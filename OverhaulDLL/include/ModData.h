@@ -24,6 +24,22 @@
 #define _DS1_OVERHAUL_PREF_DISABLE_LOW_FPS_DISCONNECT_ "DisableLowFpsDisconnect"
 #define _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_ "UseSteamNames"
 #define _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_ "FixHpBarSize"
+#define _DS1_OVERHAUL_PREF_CHEATS_ "EnableQoLCheats"
+#define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
+// Keybinds:
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_GOODS_CONSUME_ "ToggleGoodsConsume"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_ARROW_CONSUME_ "ToggleArrowConsume"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_MAGIC_CONSUME_ "ToggleMagicConsume"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_UNDEAD_ "ToggleUndead"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_EVENT_SUPER_ARMOR_ "ToggleEventSuperArmor"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_UPDATE_AI_  "ToggleUpdateAI"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_GRAVITY_  "ToggleGravity"
+#define _DS1_OVERHAUL_HOTKEY_TOGGLE_HUD_ "ToggleHUD"
+#define _DS1_OVERHAUL_HOTKEY_REVIVE_CHAR_ "ReviveChar"
+#define _DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_ "HollowChar"
+#define _DS1_OVERHAUL_HOTKEY_WARP_ "Warp"
+#define _DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_ "PrintPlayers"
+
 
 #define _DS1_OVERHAUL_SETTINGS_STRING_BUFF_LEN_ 256  // Length of the string buffer used when obtaining user preference-related string data
 
@@ -71,6 +87,12 @@ public:
 
     // If we use steam names or character names for players
     static bool use_steam_names;
+
+    // Enables default cheats
+    static bool enable_qol_cheats;
+
+    // Enables verbose messages
+    static bool enable_verbose_messages;
 
     // Custom game archive files to load instead of the vanilla game files
     static std::wstring custom_game_archive_path;

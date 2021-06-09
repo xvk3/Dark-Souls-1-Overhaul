@@ -40,6 +40,9 @@ public:
     static bool save_file_index_make_new;
 
     static std::set<std::wstring> files_to_intercept_loading;
+    static std::set<std::wstring> files_to_always_intercept_loading;
+
+    static bool UseOverhaulFiles;
 
 private:
     static void set_save_file_index(int unsigned index);

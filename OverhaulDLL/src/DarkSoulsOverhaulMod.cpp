@@ -26,6 +26,7 @@
 #include "ModNetworking.h"
 #include "MainLoop.h"
 #include "FileReloading.h"
+#include "Cheats.h"
 
 HMODULE d3d11_module;
 
@@ -100,6 +101,8 @@ DWORD WINAPI on_process_attach_async(LPVOID lpParam)
     ModNetworking::start();
     FileReloading::start();
     Game::disable_low_fps_disconnect(Mod::disable_low_fps_disconnect);
+
+    Cheats::start();
 
     ConsoleWrite("%s All initial loading finished!", Mod::output_prefix);
 
