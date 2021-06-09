@@ -89,17 +89,15 @@ class FileReloading
 {
 public:
     static void start();
-    static void LoadGameParam();
-    static bool GameParamsLoaded;
+    static void ReloadGameParam();
     static void ReloadPlayer();
     static void RefreshPlayerStats();
-    static void SetParamsToUse(bool legacy);
 private:
-    static void UnloadIndividualParams(std::vector<IndividualParams> i_params, std::vector<IndividualSoloParams> is_params);
+    static void UnloadIndividualParams(std::vector<IndividualParams> params);
+    static void UnloadIndividualSoloParams(std::vector<IndividualSoloParams> params);
     static void ReloadParamFile(ParamBNDs paramfile);
 
     static const uint64_t CalcCorrectGraph_injection_offset = 0x2de08d;
-    static const uint64_t get_ParamResCap_from_ParamMan_injection_offset = 0x52fc50;
 };
 
 #endif

@@ -9,19 +9,17 @@
 #include "AnimationEdits.h"
 #include "DarkSoulsOverhaulMod.h"
 #include "SP/memory/injection/asm/x64.h"
+#include <unordered_map>
 #include <set>
 #include "MainLoop.h"
-#include "ModNetworking.h"
 
 void AnimationEdits::start()
 {
-    AnimationEdits::alter_animation_parameters();
+    AnimationEdits::alter_animation_speeds();
     AnimationEdits::disable_whiff_animations();
+    AnimationEdits::fix_curvedsword_infinites();
 }
 
-/*
- * ========== ADJUST ANIMATION PARAMETERS
- */
 
 // key - animation id
 // value - new speed ratio (Any large number ~>10 does a frame 1 skip), and point to start speed ajustment in seconds
@@ -39,43 +37,6 @@ static const std::unordered_map<int32_t, std::tuple<float, float>> ANIMATIONS_TO
     { 9000, {1.25f, 3.0f}}, { 9420, {1.25f, 3.0f}},  //getting backstabbed (total times 5.9 and 5.766667)
 };
 
-std::unordered_map<uint16_t, AnimationStateTypesEnum> AnimationEdits::STATEIDS_TO_ROLLBACK = {
-    //dodges
-    {32, Upper_SpecialAttack},
-    {33, Upper_SpecialAttack},
-    {34, Upper_SpecialAttack},
-    {35, Upper_SpecialAttack},
-    {36, Upper_SpecialAttack},
-    {38, Upper_SpecialAttack},
-    {94, Upper_SpecialAttack},
-    {95, Upper_SpecialAttack},
-    {96, Upper_SpecialAttack},
-    {97, Upper_SpecialAttack},
-    {98, Upper_SpecialAttack},
-    {100, Upper_SpecialAttack},
-    //weapon attacks
-    {41, Upper_SpecialAttack},
-    {45, Upper_SpecialAttack},
-    {46, Upper_SpecialAttack},
-    {48, Upper_SpecialAttack},
-    {49, Upper_SpecialAttack},
-    {53, Upper_SpecialAttack},
-    {55, Upper_SpecialAttack},
-    {59, Upper_SpecialAttack},
-    {60, Upper_SpecialAttack},
-    {89, Upper_SpecialAttack},
-    {90, Upper_SpecialAttack},
-    {103, Upper_SpecialAttack},
-    {107, Upper_SpecialAttack},
-    {109, Upper_SpecialAttack},
-    {110, Upper_SpecialAttack},
-    {113, Upper_SpecialAttack},
-    {115, Upper_SpecialAttack},
-    {116, Upper_SpecialAttack},
-    {86, Upper_SpecialAttack}, //Left Hand Special Move
-    //TODO spell attacks
-};
-
 
 extern "C" {
     uint64_t animation_entry_set_return;
@@ -83,35 +44,12 @@ extern "C" {
     void read_body_aid_injection_helper_function(int32_t*, float*);
 }
 
-void AnimationEdits::alter_animation_parameters()
+void AnimationEdits::alter_animation_speeds()
 {
-    global::cmd_out << Mod::output_prefix << ("Enabling animation parameter alteration injection...\n");
+    global::cmd_out << Mod::output_prefix << ("Enabling animation speed alteration injection...\n");
 
     uint8_t *write_address = (uint8_t*)(AnimationEdits::animation_entry_set_offset + Game::ds1_base);
     sp::mem::code::x64::inject_jmp_14b(write_address, &animation_entry_set_return, 1, &animation_entry_set_injection);
-}
-
-bool AnimationEdits::SetAnimationTimeOffset(void* time_offset_arg)
-{
-    SetAnimationTimeOffsetArg* time_offset = (SetAnimationTimeOffsetArg*)time_offset_arg;
-
-    //wait 2 frames for the animation to be loaded in and the "true offset" to be available
-    if (time_offset->frameStart + 1 >= Game::get_frame_count())
-    {
-        return true;
-    }
-
-    //set the animations new offset
-    float startingOffset = Game::convert_time_to_offset(Game::get_synced_time() - time_offset->timeAnimationTriggered);
-    //ConsoleWrite("Setting %lld to offset %f", Game::get_animation_mediator_state_animation(time_offset->animationMediatorPtr, AnimationEdits::STATEIDS_TO_ROLLBACK[time_offset->animationState]), startingOffset);
-    bool res = Game::set_animation_currentProgress(time_offset->animationMediatorPtr, AnimationEdits::STATEIDS_TO_ROLLBACK[time_offset->animationState], startingOffset);
-    if (!res)
-    {
-        return true;
-    }
-
-    free(time_offset_arg);
-    return false;
 }
 
 typedef struct SpeedAlterStruct_ {
@@ -212,10 +150,6 @@ void read_body_aid_injection_helper_function(int32_t* animation_id, float* speed
     }
 }
 
-/*
- * ========== DISABLE WHIFF ANIMATIONS
- */
-
 extern "C" {
     uint64_t disable_whiff_animations_injection_return;
     void disable_whiff_animations_injection();
@@ -238,3 +172,74 @@ uint8_t disable_whiff_animations_injection_helper(uint8_t whiff) {
 
     return 0; //disable whiff
 }
+
+extern "C" {
+    uint64_t TAE_GetDamageRate_StunLen_finish_return;
+    void TAE_GetDamageRate_StunLen_finish_injection();
+    float TAE_GetDamageRate_StunLen_finish_helper_function(float);
+}
+
+void AnimationEdits::fix_curvedsword_infinites() {
+    global::cmd_out << Mod::output_prefix << ("Fix curved swords stun time...\n");
+
+    uint8_t *write_address = (uint8_t*)(AnimationEdits::TAE_GetDamageRate_StunLen_finish_offset + Game::ds1_base);
+    sp::mem::code::x64::inject_jmp_14b(write_address, &TAE_GetDamageRate_StunLen_finish_return, 0, &TAE_GetDamageRate_StunLen_finish_injection);
+}
+
+//decrease the stun length so that defender can roll escape
+float TAE_GetDamageRate_StunLen_finish_helper_function(float current_stun)
+{
+    //If feature disabled, don't do anything
+    if (Mod::legacy_mode) {
+        return current_stun;
+    }
+
+    uint32_t weaponid = Game::get_last_attack_weapon_id();
+
+    //if this is a curved sword (except QFS)
+    if ((weaponid >= 400000 && weaponid < 406000) || weaponid == 9010000) {
+        return (current_stun - 0.15f);
+    }
+    return current_stun;
+}
+
+#if 0
+extern "C" {
+    uint64_t Calculate_movement_delta_return;
+    void Calculate_movement_delta_injection();
+    void Calculate_movement_delta_helper_function(uint64_t, float*);
+}
+
+void AnimationEdits::fix_roll_distance() {
+    global::cmd_out << Mod::output_prefix << ("Correct roll distance...\n");
+
+    uint8_t *write_address = (uint8_t*)(AnimationEdits::Calculate_movement_delta_offset + Game::ds1_base);
+    sp::mem::code::x64::inject_jmp_14b(write_address, &Calculate_movement_delta_return, 2, &Calculate_movement_delta_injection);
+}
+
+static const std::unordered_map<int32_t, const std::vector<float>> hka_reference_frames_distances = {
+    {700, {}}, //Roll forward(fast)
+    {701, {}}, //Roll backward(fast)
+    {702, {}}, //Roll left(fast)
+    {703, {}}, //Roll right(fast)
+
+    {710, {}}, //Roll forward(mid)
+    {711, {}}, //Roll backward(mid)
+    {712, {}}, //Roll left(mid)
+    {713, {}}, //Roll right(mid)
+
+    {720, {}}, //Roll forward(fat / slow)
+    {721, {}}, //Roll backward(fat / slow)
+    {722, {}}, //Roll left(fat / slow)
+    {723, {}}, //Roll right(fat / slow)
+
+    {735, {}}, //Roll forward(fast, Dark Wood Grain Ring)
+    {736, {}}, //Roll backward(fast, Dark Wood Grain Ring)
+    {737, {}}, //Roll left(fast, Dark Wood Grain Ring)
+    {738, {}}, //Roll right(fast, Dark Wood Grain Ring)
+};
+
+void Calculate_movement_delta_helper_function(uint64_t playerCtrl, float* movement_delta)
+{
+}
+#endif

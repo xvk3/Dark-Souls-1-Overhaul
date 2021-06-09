@@ -18,7 +18,6 @@
 #include "AnimationEdits.h"
 #include "SP/memory/injection/asm/x64.h"
 #include "FileReloading.h"
-#include "ModNetworking.h"
 #include "Cheats.h"
 
 
@@ -62,9 +61,6 @@ extern "C" {
     void char_loaded_injection();
     uint64_t char_loading_injection_return;
     void char_loading_injection();
-
-    uint64_t gui_hpbar_max_injection_return;
-    void gui_hpbar_max_injection();
 }
 
 // Flag to determine if any characters have been loaded since the game was launched (useful if player had a character loaded but returned to main menu)
@@ -143,10 +139,6 @@ void Game::init()
     sp::mem::code::x64::inject_jmp_14b(write_address, &char_loaded_injection_return, 6, &char_loaded_injection);
     write_address = (uint8_t*)(Game::char_loading_injection_offset + Game::ds1_base);
     sp::mem::code::x64::inject_jmp_14b(write_address, &char_loading_injection_return, 1, &char_loading_injection);
-
-    //inject the code that saves the HP Bar UI element pointer
-    write_address = (uint8_t*)(Game::gui_hpbar_max_injection_offset + Game::ds1_base);
-    sp::mem::code::x64::inject_jmp_14b(write_address, &gui_hpbar_max_injection_return, 7, &gui_hpbar_max_injection);
 }
 
 static bool character_reload_run = false;
@@ -165,10 +157,7 @@ bool Game::on_character_load(void* unused)
 
         character_reload_run = true;
 
-        //only now, on first load, do we load the overhaul files
-        //This way we know they're the 2nd thing loaded
-        //(also only load them once since they get saved once loaded)
-        FileReloading::LoadGameParam();
+        Cheats::applyCheats();
 
         //need to force refresh the character in case the legacy mod changed while the game was off (restarting the game doesn't do this for some reason)
         FileReloading::RefreshPlayerStats();
@@ -289,7 +278,7 @@ void Game::preload_function_caches() {
     Game::get_player_animationMediator();
     host_player_gamedata_cache = NULL;
     Game::get_host_player_gamedata();
-    //updateBase();
+    updateBase();
 
     Sleep(10);
     //this pointer is a bit late to resolve on load
@@ -587,75 +576,15 @@ std::optional<void*> Game::get_player_animationMediator()
     }
 }
 
-void* Game::get_PlayerIns_AnimationMediator(uint64_t playerIns)
-{
-    sp::mem::pointer animationMediator = sp::mem::pointer<void*>((void*)(playerIns + 0x68), { 0x20 });
-    if (animationMediator.resolve() == NULL)
-    {
-        return NULL;
-    }
-    else
-    {
-        return *animationMediator.resolve();
-    }
-}
-
-int32_t Game::get_animation_mediator_state_animation(void* animationMediator, AnimationStateTypesEnum state_id) {
+std::optional<int32_t> Game::get_animation_mediator_state_animation(void* animationMediator, AnimationStateTypesEnum state_id) {
     void* state_entry = (void*)((uint64_t)animationMediator + 168 * state_id);
     return *(int32_t*)((uint64_t)state_entry + 0);
 }
 
-bool Game::set_animation_currentProgress(void* animationMediator, AnimationStateTypesEnum state_id, float new_progressTime) {
-    uint64_t state_entry = ((uint64_t)animationMediator + 168 * state_id);
-
-    //sets the currentProgress that is read by the renderer this frame
-    *(float*)(state_entry + 0xa4) = new_progressTime;
-
-    //sets the currentProgress that is used to overwrite the above currentProgress in all later frames
-    uint32_t animationController_index = -1;
-
-    uint64_t linked_animation1 = *(uint64_t*)(state_entry + 0x90);
-    if (linked_animation1 != NULL)
-    {
-        animationController_index = *(uint32_t*)(linked_animation1 + 4);
-    }
-    else
-    {
-        animationController_index = *(uint32_t*)(state_entry + 4);
-    }
-    animationController_index = (animationController_index & 0xffff);
-    if (animationController_index >= 6)
-    {
-        return false;
-    }
-
-    uint64_t AnimationMediator_field0x1460 = *(uint64_t*)((uint64_t)(animationMediator)+0x1460);
-    uint64_t AnimationMediator_field0x1460_field0x8_elem = *(uint64_t*)(AnimationMediator_field0x1460 + 0x8 + animationController_index*8);
-    if (AnimationMediator_field0x1460_field0x8_elem == NULL)
-    {
-        return false;
-    }
-    uint32_t ChrCtrl_Animation_index = *(uint32_t*)(AnimationMediator_field0x1460_field0x8_elem + 0x140) & 0xffff;
-
-    uint64_t ChrCtrl_AnimationQueue = *(uint64_t*)(AnimationMediator_field0x1460+0);
-    uint64_t ChrCtrl_AnimationQueue_arrayLength = *(uint32_t*)(ChrCtrl_AnimationQueue + 0);
-    if (ChrCtrl_Animation_index >= ChrCtrl_AnimationQueue_arrayLength)
-    {
-        return false;
-    }
-    uint64_t ChrCtrl_AnimationQueue_field0x8 = *(uint64_t*)(ChrCtrl_AnimationQueue + 8);
-    uint64_t ChrCtrl_AnimationQueue_field0x8_elem = (ChrCtrl_AnimationQueue_field0x8 + ChrCtrl_Animation_index*0x78);
-    uint16_t ChrCtrl_AnimationQueue_field0x8_elem_field0x0 = *(uint16_t*)(ChrCtrl_AnimationQueue_field0x8_elem + 0);
-    if (ChrCtrl_AnimationQueue_field0x8_elem_field0x0 != ChrCtrl_Animation_index)
-    {
-        return false;
-    }
-    uint64_t FrpgDefaultAnimationControl = *(uint64_t*)(ChrCtrl_AnimationQueue_field0x8_elem + 8);
-    float* curTimeInAnimation = (float*)(FrpgDefaultAnimationControl + 0x10);
-
-    *curTimeInAnimation = new_progressTime;
-
-    return true;
+void Game::set_animation_mediator_state_entry(void* animationMediator, AnimationStateTypesEnum state_id, int32_t new_aid, float new_progressTime) {
+    void* state_entry = (void*)((uint64_t)animationMediator + 168 * state_id);
+    *(int32_t*)((uint64_t)state_entry + 0) = new_aid;
+    *(float*)((uint64_t)state_entry + 0xa4) = new_progressTime;
 }
 
 // Return pointer to current game time in milliseconds since the game has started
@@ -719,10 +648,6 @@ const float corrected_vanilla_hpbar_max = 2633.0;
 const float original_vanilla_hpbar_max = 1900.0;
 static const uint64_t gui_hpbar_value_offset = 0x676ECD;
 
-extern "C" {
-    uint64_t Gui_HP_bar_UI_ptr = NULL;
-}
-
 // Fix the bug where the player HP could be greater than the displayed GUI bar
 void Game::set_gui_hpbar_max()
 {
@@ -739,19 +664,11 @@ void Game::set_gui_hpbar_max()
         current_hpbar_max = overhaul_hpbar_max;
     }
 
-    ConsoleWrite("Setting hp bar to %f", current_hpbar_max);
+    ConsoleWrite("%sSetting hp bar to %f", Mod::output_prefix, current_hpbar_max);
 
     //Instruction that loads the immediate float (+6 for immediate location in opcode)
     void *write_address = (void*)(Game::ds1_base + gui_hpbar_value_offset);
     sp::mem::patch_bytes((void*)((uint64_t)write_address+6), (uint8_t*)&current_hpbar_max, 4);
-
-    //Also update the FrpgMenuDlgPCGauge variable that is set based on the above, so the change is immediate
-    //If we're calling this before the variable is init'd, it's fine since the above injection will set the value and we don't need this
-    //If we're calling it after the above injection has already been exec'd, this pointer will be saved and current
-    if (Gui_HP_bar_UI_ptr != NULL)
-    {
-        *(float*)Gui_HP_bar_UI_ptr = current_hpbar_max;
-    }
 }
 
 
@@ -913,7 +830,6 @@ std::optional<uint32_t> Game::get_pc_playernum() {
     }
 }
 
-// returns PlayerIns
 std::optional<uint64_t> Game::get_connected_player(uint32_t i) {
     //go to the given index in the connectedPlayers_ChrSlotArray, grab the first value (pointer to PlayerIns) and return it
     if (connected_players_array_cache) {
@@ -1169,23 +1085,4 @@ bool Game::set_display_name(bool useSteam)
         *display_name_cache = useSteam;
         return true;
     }
-}
-
-uint64_t Game::get_accurate_time()
-{
-    uint64_t time;
-    //returns time in units of 100 nanoseconds
-    QueryUnbiasedInterruptTime(&time);
-    return time;
-}
-
-uint64_t Game::get_synced_time()
-{
-    return Game::get_accurate_time() + ModNetworking::timer_offset;
-}
-
-//convert the time we get from accurate/synced time (unit of 100ns) to the amount required for the animation entry offset value (unit of seconds)
-float Game::convert_time_to_offset(uint64_t time)
-{
-    return time / 10000000.0f;
 }

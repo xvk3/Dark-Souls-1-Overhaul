@@ -29,10 +29,9 @@
 const std::string Mod::output_prefix = "[Overhaul Mod] ";
 
 // Determines if we want to be in legacy mode or not
-bool Mod::prefer_legacy_mode = true;
+bool Mod::prefer_legacy_mode = false;
 
 // Determines whether we are in legacy mode (only applies fixes, no gameplay changes)
-// This shouls start as true, and only change to false once game is first loaded and we've set up everything needed for overhaul mode
 bool Mod::legacy_mode = true;
 
 // Determines to disable the game's "Low framerate detected" disconnection
@@ -46,9 +45,6 @@ bool Mod::fix_hp_bar_size = true;
 
 // Enables default cheats
 bool Mod::enable_qol_cheats = false;
-
-// Enables verbose messages
-bool Mod::enable_verbose_messages = false;
 
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
@@ -71,10 +67,9 @@ void Mod::get_init_preferences()
     global::cmd_out << (Mod::output_prefix + "Loading settings preferences...\n");
 
     // Check if legacy mode is enabled
-    // Don't update the actual variable, only the preferred. So we only switch on initial character load
-    // This helps us keep consistant what is loaded first
     Mod::prefer_legacy_mode = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_LEGACY_MODE_, (int)Mod::prefer_legacy_mode, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
-    if (Mod::prefer_legacy_mode)
+    Mod::legacy_mode = Mod::prefer_legacy_mode;
+    if (Mod::legacy_mode)
     {
         global::cmd_out << ("    Legacy mode enabled. Gameplay changes will not be applied.\n");
         ModNetworking::allow_connect_with_legacy_mod_host = true;
@@ -93,7 +88,7 @@ void Mod::get_init_preferences()
     Mod::use_steam_names = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_, (int)Mod::use_steam_names, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
-    Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+
 }
 
 bool check_hotkeys(void* unused)
@@ -150,9 +145,9 @@ void Mod::get_single_user_keybind(const char *keybind_name, int(*function)())
         std::stringstream hex_stream;
         hex_stream << std::hex << (int)key; // Convert Virtual-key code to hex string
         output.append(hex_stream.str());
-        output += ')';
+        output += ')\n';
         global::cmd_out << (output.c_str());
-    }
+    } 
 }
 
 // Get custom game files from the settings file
@@ -226,10 +221,8 @@ void Mod::set_mode(bool legacy, bool mod_installed)
     if (Mod::legacy_mode != legacy)
     {
         legacy_mode = legacy;
-        Files::UseOverhaulFiles = !legacy;
-        FileReloading::SetParamsToUse(legacy);
+        FileReloading::ReloadGameParam();
         FileReloading::ReloadPlayer();
-        FileReloading::RefreshPlayerStats();
     }
 }
 
@@ -252,7 +245,7 @@ ModMode Mod::get_mode()
 
 bool Mod::set_preferred_mode(void* unused)
 {
-    if (Game::playerchar_is_loaded() && FileReloading::GameParamsLoaded)
+    if (Game::playerchar_is_loaded())
     {
         // Check if we are not in any multiplayer setting, so that the user's preferred legacy mode setting can be applied
         auto session_action_result = Game::get_SessionManagerImp_session_action_result();

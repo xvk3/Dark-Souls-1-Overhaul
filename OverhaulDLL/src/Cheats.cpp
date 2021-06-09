@@ -81,31 +81,29 @@ Cheats::~Cheats()
 
 void Cheats::start() {
 
-    ConsoleWrite("%s -Cheats::start: entered", Mod::output_prefix);
+    ConsoleWrite("%sCheats::start()", Mod::output_prefix);
 
     // Initialise BaseXOffset
     BaseXOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 48 39 48 68 0F 94 C0 C3");
-    ConsoleWrite("%s --Cheats::start: BaseXOffset = 0x%X", Mod::output_prefix, BaseXOffset);
+    ConsoleWrite("%s BaseXOffset = 0x%X", Mod::output_prefix, BaseXOffset);
 
     // Initialise BaseBOffset
     BaseBOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 45 33 ED 48 8B F1 48 85 C0");
-    ConsoleWrite("%s --Cheats::start: BaseBOffset = 0x%X", Mod::output_prefix, BaseBOffset);
+    ConsoleWrite("%s BaseBOffset = 0x%X", Mod::output_prefix, BaseBOffset);
 
     // Initialise BasePOffset
     BasePOffset = (uint64_t)sp::mem::aob_scan("4C 8B 05 ?? ?? ?? ?? 48 63 C9 48 8D 04 C9");
-    ConsoleWrite("%s --Cheats::start: BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
+    ConsoleWrite("%s BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
 
     // Initialise Homeward
     Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
-    ConsoleWrite("%s --Cheats::start: Homeward = 0x%X", Mod::output_prefix, Homeward);
+    ConsoleWrite("%s Homeward = 0x%X", Mod::output_prefix, Homeward);
 
     // Runs until a character is loaded, then updates a couple of pointers and never runs again
     MainLoop::setup_mainloop_callback(delayedVariableUpdateWrapper, NULL, "delayedVariableUpdate");
 
     // Runs continiously and calls other functions when a character is loaded
     MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
-
-    ConsoleWrite("%s -Cheats::start: completed");
 }
 
 bool Cheats::applyCheats() {
@@ -136,16 +134,17 @@ void RedEyeOrb() {
     RedEyeOrb = CheatsASMFollow(RedEyeOrb + 0x38);
     RedEyeOrb = RedEyeOrb + 0xDA8;
 
-    ConsoleWriteDebug("%s -RedEyeOrb = 0x%X", Mod::output_prefix, RedEyeOrb);
+    ConsoleWrite("%s RedEyeOrb = 0x%X", Mod::output_prefix, RedEyeOrb);
 
-    ConsoleWriteDebug("%s --RedEyeOrb: unrestrict_patch     = 0x%X", Mod::output_prefix, RedEyeOrb + 0x42);
-    ConsoleWriteDebug("%s --RedEyeOrb: modify_use_animation = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3E);
-    ConsoleWriteDebug("%s --RedEyeOrb: opmeMenuType_patch   = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3F);
+    ConsoleWrite("%s -   unrestrict_patch     = 0x%X", Mod::output_prefix, RedEyeOrb + 0x44);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3E);
+    ConsoleWrite("%s -   opmeMenuType_patch   = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3F);
 
     memcpy((void*)(RedEyeOrb + 0x42), unrestrict_patch, 3);
     memcpy((void*)(RedEyeOrb + 0x3E), modify_use_animation, 1);
     memcpy((void*)(RedEyeOrb + 0x3F), opmeMenuType_patch, 1);   // Could be combined with the "modify_use_animation" patch
-    ConsoleWriteDebug("%s --RedEyeOrb: no menu, no restrictions, different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s RedEyeOrb: no menu, no restrictions, different animation", Mod::output_prefix);
 }
 
 void EyeOfDeath() {
@@ -159,16 +158,17 @@ void EyeOfDeath() {
     EyeOfDeath = CheatsASMFollow(EyeOfDeath + 0x38);
     EyeOfDeath = EyeOfDeath + 0xF18;
 
-    ConsoleWriteDebug("%s -EyeOfDeath = 0x%X", Mod::output_prefix, EyeOfDeath);
+    ConsoleWrite("%s EyeOfDeath = 0x%X", Mod::output_prefix, EyeOfDeath);
 
-    ConsoleWriteDebug("%s --EyeOfDeath: unrestrict_patch     = 0x%X", Mod::output_prefix, EyeOfDeath + 0x42);
-    ConsoleWriteDebug("%s --EyeOfDeath: modify_use_animation = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3E);
-    ConsoleWriteDebug("%s --EyeOfDeath: opmeMenuType_patch   = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3F);
+    ConsoleWrite("%s -   unrestrict_patch     = 0x%X", Mod::output_prefix, EyeOfDeath + 0x44);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3E);
+    ConsoleWrite("%s -   opmeMenuType_patch   = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3F);
 
     memcpy((void*)(EyeOfDeath + 0x42), unrestrict_patch, 3);
     memcpy((void*)(EyeOfDeath + 0x3E), modify_use_animation, 1);
     memcpy((void*)(EyeOfDeath + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --EyeOfDeath: no menu, no restrictions, different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s EyeOfDeath: no menu, no restrictions, different animation", Mod::output_prefix);
 }
 
 void GreenBlossom() {
@@ -180,12 +180,13 @@ void GreenBlossom() {
     GreenBlossom = CheatsASMFollow(GreenBlossom + 0x38);
     GreenBlossom = GreenBlossom + 0x1EE8;
 
-    ConsoleWriteDebug("%s -GreenBlossom = 0x%X", Mod::output_prefix, GreenBlossom);
+    ConsoleWrite("%s GreenBlossom = 0x%X", Mod::output_prefix, GreenBlossom);
 
-    ConsoleWriteDebug("%s --GreenBlossom: unrestrict_use_limit = 0x%X", Mod::output_prefix, GreenBlossom + 0x3B);
+    ConsoleWrite("%s -   unrestrict_use_limit = 0x%X", Mod::output_prefix, GreenBlossom + 0x3B);
 
     memcpy((void*)(GreenBlossom + 0x3B), unrestrict_use_limit, 1);
-    ConsoleWriteDebug("%s --GreenBlossom: no restrictions", Mod::output_prefix);
+
+    ConsoleWrite("%s GreenBlossom: no restrictions", Mod::output_prefix);
 }
 
 void RedSignSoapstone() {
@@ -197,12 +198,13 @@ void RedSignSoapstone() {
     RedSignSoapstone = CheatsASMFollow(RedSignSoapstone + 0x38);
     RedSignSoapstone = RedSignSoapstone + 0xD4C;
 
-    ConsoleWriteDebug("%s -RedSignSoapstone = 0x%X", Mod::output_prefix, RedSignSoapstone);
+    ConsoleWrite("%s RedSignSoapstone = 0x%X", Mod::output_prefix, RedSignSoapstone);
 
-    ConsoleWriteDebug("%s --RedSignSoapstone: unrestrict_patch = 0x%X", Mod::output_prefix, RedSignSoapstone + 0x42);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, RedSignSoapstone + 0x44);
 
-    memcpy((void*)(RedSignSoapstone + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --RedSignSoapstone: no restrictions", Mod::output_prefix);
+    memcpy((void*)(RedSignSoapstone + 0x44), unrestrict_patch, 3);
+
+    ConsoleWrite("%s RedSignSoapstone: no restrictions", Mod::output_prefix);
 }
 
 void CrackedRedEyeOrb() {
@@ -226,14 +228,15 @@ void CrackedRedEyeOrb() {
     CrackedRedEyeOrb = CheatsASMFollow(CrackedRedEyeOrb + 0x38);
     CrackedRedEyeOrb = CrackedRedEyeOrb + 0xF74;
 
-    ConsoleWriteDebug("%s -CrackedRedEyeOrb = 0x%X", Mod::output_prefix, CrackedRedEyeOrb);
+    ConsoleWrite("%s CrackedRedEyeOrb = 0x%X", Mod::output_prefix, CrackedRedEyeOrb);
 
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: unrestrict_patch     = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x42);
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: opmeMenuType_patch   = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x3F);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x44);
+    ConsoleWrite("%s -   opmeMenuType_patch   = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x3F);
 
-    memcpy((void*)(CrackedRedEyeOrb + 0x42), unrestrict_patch, 3);
+    memcpy((void*)(CrackedRedEyeOrb + 0x44), unrestrict_patch, 3);
     memcpy((void*)(CrackedRedEyeOrb + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: no menu, no restrictions", Mod::output_prefix);
+
+    ConsoleWrite("%s CrackedRedEyeOrb: no menu, no restrictions", Mod::output_prefix);
 }
 
 void Humanity() {
@@ -245,12 +248,12 @@ void Humanity() {
     Humanity = CheatsASMFollow(Humanity + 0x38);
     Humanity = Humanity + 0x313C;
 
-    ConsoleWriteDebug("%s -Humanity = 0x%X", Mod::output_prefix, Humanity);
+    ConsoleWrite("%s Humanity = 0x%X", Mod::output_prefix, Humanity);
 
-    ConsoleWriteDebug("%s --Humanity: unrestrict_patch = 0x%X", Mod::output_prefix, Humanity + 0x42);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, Humanity + 0x44);
    
-    memcpy((void*)(Humanity + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --Humanity: no restrictions", Mod::output_prefix);
+    memcpy((void*)(Humanity + 0x44), unrestrict_patch, 3);
+    ConsoleWrite("%s Humanity: no restrictions", Mod::output_prefix);
 }
 
 void TwinHumanity() {
@@ -262,13 +265,12 @@ void TwinHumanity() {
     TwinHumanity = CheatsASMFollow(TwinHumanity + 0x38);
     TwinHumanity = TwinHumanity + 0x3198;
 
-    ConsoleWriteDebug("%s -TwinHumanity = 0x%X", Mod::output_prefix, TwinHumanity);
+    ConsoleWrite("%s TwinHumanity = 0x%X", Mod::output_prefix, TwinHumanity);
 
-    ConsoleWriteDebug("%s --TwinHumanity: unrestrict_patch = 0x%X", Mod::output_prefix, TwinHumanity + 0x42);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, TwinHumanity + 0x44);
 
-    memcpy((void*)(TwinHumanity + 0x42), unrestrict_patch, 3);
-
-    ConsoleWriteDebug("%s --TwinHumanity: no restrictions", Mod::output_prefix);
+    memcpy((void*)(TwinHumanity + 0x44), unrestrict_patch, 3);
+    ConsoleWrite("%s TwinHumanity: no restrictions", Mod::output_prefix);
 }
 
 void DivineBlessing() {
@@ -280,12 +282,13 @@ void DivineBlessing() {
     DivineBlessing = CheatsASMFollow(DivineBlessing + 0x38);
     DivineBlessing = DivineBlessing + 0x1E8C;
 
-    ConsoleWriteDebug("%s -DivineBlessing = 0x%X", Mod::output_prefix, DivineBlessing);
+    ConsoleWrite("%s DivineBlessing = 0x%X", Mod::output_prefix, DivineBlessing);
 
-    ConsoleWriteDebug("%s --DivineBlessing: unrestrict_patch = 0x%X", Mod::output_prefix, DivineBlessing + 0x42);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, DivineBlessing + 0x44);
 
-    memcpy((void*)(DivineBlessing + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --DivineBlessing: no restrictions", Mod::output_prefix);
+    memcpy((void*)(DivineBlessing + 0x44), unrestrict_patch, 3);
+
+    ConsoleWrite("%s DivineBlessing: no restrictions", Mod::output_prefix);
 }
 
 void ElizabethMushroom() {
@@ -297,12 +300,13 @@ void ElizabethMushroom() {
     ElizabethMushroom = CheatsASMFollow(ElizabethMushroom + 0x38);
     ElizabethMushroom = ElizabethMushroom + 0x1E30;
 
-    ConsoleWriteDebug("%s -ElizabethMushroom = 0x%X", Mod::output_prefix, ElizabethMushroom);
+    ConsoleWrite("%s ElizabethMushroom = 0x%X", Mod::output_prefix, ElizabethMushroom);
 
-    ConsoleWriteDebug("%s --ElizabethMushroom: unrestrict_patch = 0x%X", Mod::output_prefix, ElizabethMushroom + 0x42);
+    ConsoleWrite("%s -   unrestrict_patch = 0x%X", Mod::output_prefix, ElizabethMushroom + 0x44);
 
-    memcpy((void*)(ElizabethMushroom + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --ElizabethMushroom: no restrictions", Mod::output_prefix);
+    memcpy((void*)(ElizabethMushroom + 0x44), unrestrict_patch, 3);
+
+    ConsoleWrite("%s ElizabethMushroom: no restrictions", Mod::output_prefix);
 }
 
 void HomewardBone() {
@@ -316,16 +320,17 @@ void HomewardBone() {
     HomewardBone = CheatsASMFollow(HomewardBone + 0x38);
     HomewardBone = HomewardBone + 0x2560;
 
-    ConsoleWriteDebug("%s -HomewardBone = 0x%X", Mod::output_prefix, HomewardBone);
+    ConsoleWrite("%s HomewardBone = 0x%X", Mod::output_prefix, HomewardBone);
 
-    ConsoleWriteDebug("%s --HomewardBone: unrestrict_patch     = 0x%X", Mod::output_prefix, HomewardBone + 0x42);
-    ConsoleWriteDebug("%s --HomewardBone: modify_use_animation = 0x%X", Mod::output_prefix, HomewardBone + 0x3E);
-    ConsoleWriteDebug("%s --HomewardBone: opmeMenuType_patch   = 0x%X", Mod::output_prefix, HomewardBone + 0x3F);
+    ConsoleWrite("%s -   unrestrict_patch     = 0x%X", Mod::output_prefix, HomewardBone + 0x44);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, HomewardBone + 0x3E);
+    ConsoleWrite("%s -   opmeMenuType_patch   = 0x%X", Mod::output_prefix, HomewardBone + 0x3F);
 
     memcpy((void*)(HomewardBone + 0x42), unrestrict_patch, 3);
     memcpy((void*)(HomewardBone + 0x3E), modify_use_animation, 1);
     memcpy((void*)(HomewardBone + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --HomewardBone: no menu, no restrictions, different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s HomewardBone: no menu, no restrictions, different animation", Mod::output_prefix);
 }
 
 void DriedFinger() {
@@ -337,14 +342,16 @@ void DriedFinger() {
     uint64_t DriedFinger = CheatsASMFollow(BaseP + 0xF0);
     DriedFinger = CheatsASMFollow(DriedFinger + 0x38);
     DriedFinger = DriedFinger + 0x2AC4;
-    ConsoleWriteDebug("%s -DriedFinger = 0x%X", Mod::output_prefix, DriedFinger);
+    ConsoleWrite("%s DriedFinger = 0x%X", Mod::output_prefix, DriedFinger);
 
-    ConsoleWriteDebug("%s --DriedFinger: modify_use_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x3E);
-    ConsoleWriteDebug("%s --DriedFinger: modify_sfx_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x04);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x3E);
+    ConsoleWrite("%s -   modify_sfx_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x04);
    
     memcpy((void*)(DriedFinger + 0x3E), modify_use_animation, 1);
     memcpy((void*)(DriedFinger + 0x04), modify_sfx_variation, 1);
-    ConsoleWriteDebug("%s --DriedFinger: different animation, different SFX", Mod::output_prefix);
+   
+    ConsoleWrite("%s DriedFinger: different animation, different SFX", Mod::output_prefix);
+
 }
 
 void CharcoalPineResin() {
@@ -355,12 +362,13 @@ void CharcoalPineResin() {
     uint64_t CharcoalPineResin = CheatsASMFollow(BaseP + 0xF0);
     CharcoalPineResin = CheatsASMFollow(CharcoalPineResin + 0x38);
     CharcoalPineResin = CharcoalPineResin + 0x23F0;
-    ConsoleWriteDebug("%s -CharcoalPineResin = 0x%X", Mod::output_prefix, CharcoalPineResin);
+    ConsoleWrite("%s CharcoalPineResin = 0x%X", Mod::output_prefix, CharcoalPineResin);
 
-    ConsoleWriteDebug("%s --CharcoalPineResin: modify_use_animation = 0x%X", Mod::output_prefix, CharcoalPineResin + 0x3E);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, CharcoalPineResin + 0x3E);
 
     memcpy((void*)(CharcoalPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --CharcoalPineResin: different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s CharcoalPineResin: different animation", Mod::output_prefix);
 
 }
 
@@ -372,12 +380,13 @@ void RottenPineResin() {
     uint64_t RottenPineResin = CheatsASMFollow(BaseP + 0xF0);
     RottenPineResin = CheatsASMFollow(RottenPineResin + 0x38);
     RottenPineResin = RottenPineResin + 0x2504;
-    ConsoleWriteDebug("%s -RottenPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
+    ConsoleWrite("%s RottenPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
 
-    ConsoleWriteDebug("%s --RottenPineResin: modify_use_animation = 0x%X", Mod::output_prefix, RottenPineResin + 0x3E);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, RottenPineResin + 0x3E);
 
     memcpy((void*)(RottenPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --RottenPineResin: different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s RottenPineResin: different animation", Mod::output_prefix);
 }
 
 void GoldPineResin() {
@@ -388,12 +397,13 @@ void GoldPineResin() {
     uint64_t GoldPineResin = CheatsASMFollow(BaseP + 0xF0);
     GoldPineResin = CheatsASMFollow(GoldPineResin + 0x38);
     GoldPineResin = GoldPineResin + 0x244C;
-    ConsoleWriteDebug("%s -GoldPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
+    ConsoleWrite("%s GoldPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
 
-    ConsoleWriteDebug("%s --GoldPineResin: modify_use_animation = 0x%X", Mod::output_prefix, GoldPineResin + 0x3E);
+    ConsoleWrite("%s -   modify_use_animation = 0x%X", Mod::output_prefix, GoldPineResin + 0x3E);
 
     memcpy((void*)(GoldPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --GoldPineResin: different animation", Mod::output_prefix);
+
+    ConsoleWrite("%s GoldPineResin: different animation", Mod::output_prefix);
 }
 
 // noGoodsConsume
@@ -711,18 +721,15 @@ bool delayedVariableUpdateWrapper(void* unused) {
 
 void delayedVariableUpdate() {
 
-    ConsoleWriteDebug("%s -delayedVariableUpdate: entered", Mod::output_prefix);
-
-    // Ensure pointers are initialised
-    updateBase();
+    ConsoleWrite("%s delayedVariableUpdate", Mod::output_prefix);
 
     // Initialise debug_flagsOffset
     debug_flagsOffset = (uint64_t)sp::mem::aob_scan("4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 41 B1 01 4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B 8F 10 01 00 00 E8");
-    ConsoleWrite("%s --delayedVariableUpdate: debug_flagsOffset = 0x%X", Mod::output_prefix, debug_flagsOffset);
+    ConsoleWrite("%s debug_flagsOffset = 0x%X", Mod::output_prefix, debug_flagsOffset);
 
     // debug_flags
     debug_flags = (uint64_t)debug_flagsOffset + *(uint32_t*)((uint64_t)debug_flagsOffset + 3) + 7;
-    ConsoleWrite("%s --delayedVariableUpdate: debug_flags = 0x%X", Mod::output_prefix, debug_flags);
+    ConsoleWrite("%s debug_flags = 0x%X", Mod::output_prefix, debug_flags);
 
     // One-time initialisation
     P0 = Character::initialise(P0, PlayerBase, 0);
@@ -732,16 +739,6 @@ void delayedVariableUpdate() {
     P4 = Character::initialise(P0, PlayerBase, 4);
     P5 = Character::initialise(P0, PlayerBase, 5);
 
-
-    // Problem with BaseP here, can no longer find the correct AOB
-   if (!BasePOffset) {
-        BasePOffset = (uint64_t)sp::mem::aob_scan("4C 8B 05 ?? ?? ?? ?? 48 63 C9 48 8D 04 C9");
-    }
-    ConsoleWriteDebug("%s --delayedVariableUpdate: BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-    
-    BaseP = (uint64_t)BasePOffset + *(uint32_t*)((uint64_t)BasePOffset + 3) + 7;
-    ConsoleWriteDebug("%s --delayedVariableUpdate: BaseP = 0x%X", Mod::output_prefix, BaseP);
-    
     if (Mod::enable_qol_cheats) {
 
         Cheats::noGoodsConsume.enabled = true;
@@ -767,38 +764,33 @@ void delayedVariableUpdate() {
     }
 
     variablesUpdated = true;
-    ConsoleWrite("%s -delayedVariableUpdate: completed", Mod::output_prefix);
+    ConsoleWrite("%s variablesUpdated", Mod::output_prefix);
 
 }
 
 void updateBase() {
 
-    ConsoleWriteDebug("%s -updateBase: entered", Mod::output_prefix);
+    //ConsoleWrite("%s updateBase", Mod::output_prefix);
 
     // TODO Confirm that the follow pointers NEED updates after each reload
 
     // BaseX
     BaseX = CheatsASMFollow((uint64_t)BaseXOffset + *(uint32_t*)((uint64_t)BaseXOffset + 3) + 7);
-    ConsoleWriteDebug("%s --updateBase: BaseX = 0x%X", Mod::output_prefix, BaseX);
+    //ConsoleWrite("%s BaseX = 0x%X", Mod::output_prefix, BaseX);
 
     // BaseB
     BaseB = CheatsASMFollow((uint64_t)BaseBOffset + *(uint32_t*)((uint64_t)BaseBOffset + 3) + 7);
-    ConsoleWriteDebug("%s --updateBase: BaseB = 0x%X", Mod::output_prefix, BaseB);
+    //ConsoleWrite("%s BaseB = 0x%X", Mod::output_prefix, BaseB);
 
     // BaseP
-    if (BasePOffset == 0x00) {
-        BasePOffset = (uint64_t)sp::mem::aob_scan("4C 8B 05 ?? ?? ?? ?? 48 63 C9 48 8D 04 C9");
-    }
     BaseP = CheatsASMFollow((uint64_t)BasePOffset + *(uint32_t*)((uint64_t)BasePOffset + 3) + 7);
-    ConsoleWriteDebug("%s --updateBase: BaseP = 0x%X", Mod::output_prefix, BaseP);
-    
+    //ConsoleWrite("%s BaseP = 0x%X", Mod::output_prefix, BaseP);
+
     // PlayerBase
     PlayerBase = CheatsASMFollow(BaseX + 0x68);
     PlayerBase = CheatsASMFollow(PlayerBase + 0x18);
-    ConsoleWriteDebug("%s --updateBase: PlayerBase = 0x%X", Mod::output_prefix, PlayerBase);
 
     // For pointers that need updating after load screens
-    ConsoleWrite("%s -updateBase: completed");
 }
 
 bool monitorCharacters(void* unused) {

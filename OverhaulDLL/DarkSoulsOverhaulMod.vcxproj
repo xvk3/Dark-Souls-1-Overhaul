@@ -19,6 +19,8 @@
     <ClCompile Include="src\BloodborneRallySystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\Character.cpp" />
+    <ClCompile Include="src\Cheats.cpp" />
     <ClCompile Include="src\CrashHandler.cpp" />
     <ClCompile Include="src\DarkSoulsOverhaulMod.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -46,6 +48,8 @@
     <ClInclude Include="d3d11-wrapper\include\d3d11\main.h" />
     <ClInclude Include="d3d11-wrapper\include\dllmain.h" />
     <ClInclude Include="include\AntiAntiCheat.h" />
+    <ClInclude Include="include\Character.h" />
+    <ClInclude Include="include\Cheats.h" />
     <ClInclude Include="include\CrashHandler.h" />
     <ClInclude Include="include\DarkSoulsOverhaulMod.h" />
     <ClInclude Include="include\DeadAngles.h" />
@@ -105,6 +109,7 @@
     <MASM Include="src\AntiCheat\NpcGuardASM.asm" />
     <MASM Include="src\AntiCheat\TeleBackstabProtectASM.asm" />
     <MASM Include="src\BloodborneRallySystemASM.asm" />
+    <MASM Include="src\CheatsASM.asm" />
     <MASM Include="src\CrashHandlerASM.asm" />
     <MASM Include="src\DeadAnglesASM.asm" />
     <MASM Include="src\EquipmentUnlockASM.asm" />
