@@ -46,6 +46,9 @@ bool Mod::fix_hp_bar_size = true;
 // Enables default cheats
 bool Mod::enable_qol_cheats = false;
 
+// Enables verbose messages
+bool Mod::enable_verbose_messages = false;
+
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
 
@@ -88,7 +91,7 @@ void Mod::get_init_preferences()
     Mod::use_steam_names = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_, (int)Mod::use_steam_names, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
-
+    Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
 }
 
 bool check_hotkeys(void* unused)
@@ -145,9 +148,9 @@ void Mod::get_single_user_keybind(const char *keybind_name, int(*function)())
         std::stringstream hex_stream;
         hex_stream << std::hex << (int)key; // Convert Virtual-key code to hex string
         output.append(hex_stream.str());
-        output += ')\n';
+        output += ')';
         global::cmd_out << (output.c_str());
-    } 
+    }
 }
 
 // Get custom game files from the settings file
@@ -221,8 +224,10 @@ void Mod::set_mode(bool legacy, bool mod_installed)
     if (Mod::legacy_mode != legacy)
     {
         legacy_mode = legacy;
-        FileReloading::ReloadGameParam();
+        Files::UseOverhaulFiles = !legacy;
+        FileReloading::SetParamsToUse(legacy);
         FileReloading::ReloadPlayer();
+        FileReloading::RefreshPlayerStats();
     }
 }
 
@@ -245,7 +250,7 @@ ModMode Mod::get_mode()
 
 bool Mod::set_preferred_mode(void* unused)
 {
-    if (Game::playerchar_is_loaded())
+    if (Game::playerchar_is_loaded() && FileReloading::GameParamsLoaded)
     {
         // Check if we are not in any multiplayer setting, so that the user's preferred legacy mode setting can be applied
         auto session_action_result = Game::get_SessionManagerImp_session_action_result();

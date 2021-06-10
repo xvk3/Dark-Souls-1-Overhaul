@@ -11,6 +11,8 @@
 #define DS1_OVERHAUL_ANIMATION_EDITS_H_
 
 #include <cstdint>
+#include <unordered_map>
+#include "GameData.h"
 
 typedef struct {
     int32_t animation_id;
@@ -21,6 +23,14 @@ typedef struct {
     uint32_t count;
 } AnimationEntry;
 
+typedef struct
+{
+    void* animationMediatorPtr;
+    uint16_t animationState;
+    uint64_t timeAnimationTriggered;
+    uint32_t frameStart;
+} SetAnimationTimeOffsetArg;
+
 class AnimationEdits
 {
 public:
@@ -29,23 +39,18 @@ public:
 
     static void start();
 
-private:
-    // Enables gesture cancelling via rolling
-    static void enable_gesture_cancelling();
+    static std::unordered_map<uint16_t, AnimationStateTypesEnum> STATEIDS_TO_ROLLBACK;
 
-    static void alter_animation_speeds();
+    static bool SetAnimationTimeOffset(void * time_offset_arg);
+
+private:
+    static void alter_animation_parameters();
 
     static void disable_whiff_animations();
-
-    static void fix_curvedsword_infinites();
-
-    static void fix_roll_distance();
 
 private:
     static const uint64_t animation_entry_set_offset = 0x43E281; //Triggered when an animation entry in the table has it's speed set
     static const uint64_t animation_whiff_set_offset = 0x386CC4;
-    static const uint64_t TAE_GetDamageRate_StunLen_finish_offset = 0x2dd71f;
-    static const uint64_t Calculate_movement_delta_offset = 0x37a22a;
 };
 
 #endif

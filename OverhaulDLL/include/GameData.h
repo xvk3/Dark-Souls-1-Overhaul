@@ -150,10 +150,14 @@ public:
 
     static uint64_t session_man_imp;
 
+    static uint64_t menu_man;
+
     static const uint64_t calculate_attack_damage_offset = 0x2a8ead6;
 
     static const uint64_t char_loaded_injection_offset = 0x24D8D0;
     static const uint64_t char_loading_injection_offset = 0x278FC0;
+
+    static const uint64_t gui_hpbar_max_injection_offset = 0x676ed7;
 
     // Player character status (loading, human, co-op, invader, hollow)
     static sp::mem::pointer<int32_t> player_char_status;
@@ -207,9 +211,11 @@ public:
 
     static std::optional<void*> get_player_animationMediator();
 
-    static std::optional<int32_t> get_animation_mediator_state_animation(void* animationMediator, AnimationStateTypesEnum state_id);
+    static void* get_PlayerIns_AnimationMediator(uint64_t playerIns);
 
-    static void set_animation_mediator_state_entry(void* animationMediator, AnimationStateTypesEnum state_id, int32_t new_aid, float new_progressTime);
+    static int32_t get_animation_mediator_state_animation(void* animationMediator, AnimationStateTypesEnum state_id);
+
+    static bool set_animation_currentProgress(void* animationMediator, AnimationStateTypesEnum state_id, float new_progressTime);
 
     // Return pointer to current game time in milliseconds since the game has started
     static std::optional<uint32_t*> get_game_time_ms();
@@ -286,6 +292,14 @@ public:
 	static std::optional<void*> get_host_player_gamedata();
 
 	static bool set_display_name(bool useSteam);
+
+	static uint64_t get_accurate_time();
+
+	static uint64_t get_synced_time();
+
+	static float convert_time_to_offset(uint64_t time);
+
+    static void show_popup_message(const wchar_t * msg);
 
     /*
      * Help speedup some functions by, whenever we're loaded into an area,

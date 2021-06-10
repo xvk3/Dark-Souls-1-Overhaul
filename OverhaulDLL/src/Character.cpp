@@ -15,7 +15,7 @@ Character::~Character() {
 
 Character Character::initialise(Character Char, uint64_t PlayerBase, short index) {
 
-    ConsoleWrite("%S initialising character with index %d", Mod::output_prefix, index);
+    ConsoleWrite("%s initialising character with index %d", Mod::output_prefix, index);
 
     Char._rawBase = PlayerBase;
     Char._base    = CheatsASMFollow(PlayerBase + (index * character_index_to_offset_multiplier));
@@ -35,12 +35,12 @@ Character* Character::update(uint64_t PlayerBase) {
 }
 
 char* Character::name() {
-    if (this->_name) {
-        return this->_name;
-    }
-    else {
+    //if (this->_name) {
+    //    return this->_name;
+    //}
+    //else {
         return this->_name = (char*)CheatsASMFollow(this->_base + 0x578) + 0xAB;
-    }
+    //}
 }
 
 int Character::maxHP() {

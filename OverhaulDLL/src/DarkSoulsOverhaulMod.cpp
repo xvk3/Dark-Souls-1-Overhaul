@@ -89,12 +89,12 @@ DWORD WINAPI on_process_attach_async(LPVOID lpParam)
 
     Menu::Saves::init_custom_saves();
     AntiCheat::start();
-    Game::set_gui_hpbar_max();                      // Can be active since it checks for Mod::fix_hp_bar_size
+    Game::set_gui_hpbar_max();
     BloodborneRally::start();
     DeadAngles::start();
     EquipmentUnlock::start();
     InvisBackstabFix::start();
-    AnimationEdits::start();                        // Checks for Mod::legacy_mode
+    AnimationEdits::start();
     SpellDesync::start();
     PhantomUnshackle::start();
     FixAnkles::start();

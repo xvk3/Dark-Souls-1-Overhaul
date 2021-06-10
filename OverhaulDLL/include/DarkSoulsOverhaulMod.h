@@ -67,4 +67,16 @@ void inline ConsoleWriteNLF(const char* str, ...)
     global::cmd_out << dest;
 }
 
+void inline ConsoleWriteDebug(const char* str, ...)
+{
+    if (!Mod::enable_verbose_messages) return;
+    char dest[1024];
+    va_list argptr;
+    va_start(argptr, str);
+    vsnprintf(dest, 1024, str, argptr);
+    va_end(argptr);
+
+    global::cmd_out << dest << "\n";
+}
+
 #endif

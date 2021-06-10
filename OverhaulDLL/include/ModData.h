@@ -25,6 +25,7 @@
 #define _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_ "UseSteamNames"
 #define _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_ "FixHpBarSize"
 #define _DS1_OVERHAUL_PREF_CHEATS_ "EnableQoLCheats"
+#define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
 // Keybinds:
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_GOODS_CONSUME_ "ToggleGoodsConsume"
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_ARROW_CONSUME_ "ToggleArrowConsume"
@@ -88,6 +89,9 @@ public:
 
     // Enables default cheats
     static bool enable_qol_cheats;
+
+    // Enables verbose messages
+    static bool enable_verbose_messages;
 
     // Custom game archive files to load instead of the vanilla game files
     static std::wstring custom_game_archive_path;
