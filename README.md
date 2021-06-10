@@ -26,6 +26,7 @@
  - [ ] - Improve the hotkeys
  - [ ] - Replace references to CheatsASMFollow with multi-level pointer dereferences (sp::mem::pointer?)
  - [x] - Confirm all cheats write the correct number of bytes to the address (noHUD was overwriting other data)
+ - [ ] - Record the different SummonTypes over the weekend (for use in printPlayers)
  - [ ] - Add the rest of the TODOs
 
 ### Git Stuff
