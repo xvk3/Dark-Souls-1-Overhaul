@@ -36,6 +36,7 @@ bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
 void delayedVariableUpdate();
 void printPreferences();
+void printPosition();
 
 // Variables
 uint64_t BaseXOffset = 0x00;
@@ -97,15 +98,8 @@ void Cheats::start() {
     ConsoleWriteDebug("%s --Cheats::start: BaseBOffset = 0x%X", Mod::output_prefix, BaseBOffset);
 
     // Initialise BasePOffset
-    //BasePOffset = (uint64_t)sp::mem::aob_scan("4C 8B 05 ?? ?? ?? ?? 48 63 C9 48 8D 04 C9");
-    //ConsoleWriteDebug("%s --Cheats::start: 1st Attempt BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-    //if (BasePOffset == 0x00) {
-        BasePOffset = 0x141D1B360;
-        ConsoleWriteDebug("%s --Cheats::start: BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-        // = CheatsASMFollow(BasePOffset);
-    //}  else {
-    //    ConsoleWriteDebug("%s --Cheats::start: (1st Attempt) BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-    //}
+    BasePOffset = 0x141D1B360;
+    ConsoleWriteDebug("%s --Cheats::start: BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
     
     // Initialise Homeward
     Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
@@ -595,13 +589,13 @@ int noHUDSet(bool state) {
 // Fly mode
 
 void reviveChar() {
-    ConsoleWrite("%s -reviveChar", Mod::output_prefix);
+    ConsoleWriteDebug("%s -reviveChar: entered", Mod::output_prefix);
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMReviveCharWrapper, 0, 0, 0);
 }
 
 void hollowChar() {
 
-    ConsoleWrite("%s -hollowChar", Mod::output_prefix);
+    ConsoleWriteDebug("%s -hollowChar: entered", Mod::output_prefix);
 
     byte CharType_hollow[1] = { 0x08 };
     byte TeamType_hollow[1] = { 0x04 };
@@ -624,7 +618,7 @@ void warp() {
 
     // TODO Check character is loaded here?
 
-    ConsoleWrite("%s -warp", Mod::output_prefix);
+    ConsoleWriteDebug("%s -warp: entered", Mod::output_prefix);
 
     struct SimpleClassHomewardWrapperArguments {
         uint64_t _BaseB;
@@ -640,7 +634,7 @@ void warp() {
 
 void kick(short player) {
 
-    ConsoleWrite("%s kick(%d)", Mod::output_prefix, player);
+    ConsoleWrite("%s kick(%d): entered", Mod::output_prefix, player);
 
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMKickPlayerWrapper, &player, 0, 0 );
 }
@@ -726,7 +720,7 @@ void stopDurabilityDamage() {
    
     */
 
-    ConsoleWriteDebug("%s -stopDurabilityDamage: completed", Mod::output_prefix);
+    ConsoleWriteDebug("%s -stopDurabilityDamage: completed\n", Mod::output_prefix);
 }
 
 bool delayedVariableUpdateWrapper(void* unused) {
@@ -907,13 +901,32 @@ inline void bittog(uint64_t ptr, short bit) {
     *((byte*)ptr) ^= (1 << bit);
 }
 
+void printPosition() {
+
+    // Lookup XYZ positional floats
+    sp::mem::pointer X = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x120 });
+    sp::mem::pointer Z = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x124 });
+    sp::mem::pointer Y = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x128 });
+
+    float* fX = (float*)X.resolve();
+    float* fZ = (float*)Z.resolve();
+    float* fY = (float*)Y.resolve();
+
+    // Print and check the addresses?
+
+    ConsoleWrite("%s X = %.1f", Mod::output_prefix, fX);
+    ConsoleWrite("%s Z = %.1f", Mod::output_prefix, fZ);
+    ConsoleWrite("%s Y = %.1f", Mod::output_prefix, fY);
+
+}
+
 void printPreferences() {
 
     ConsoleWrite("%s DisableLowFpsDisconnect = %d", Mod::output_prefix, Mod::disable_low_fps_disconnect);
     ConsoleWrite("%s UseSteamNames = %d", Mod::output_prefix, Mod::use_steam_names);
     ConsoleWrite("%s FixHpBarSize = %d", Mod::output_prefix, Mod::fix_hp_bar_size);
     ConsoleWrite("%s EnableQoLCheats = %d", Mod::output_prefix, Mod::enable_qol_cheats);
-    ConsoleWrite("%s VerboseMessages = %d", Mod::output_prefix, Mod::enable_verbose_messages);
+    ConsoleWrite("%s VerboseMessages = %d\n", Mod::output_prefix, Mod::enable_verbose_messages);
 
 }
 
@@ -931,8 +944,17 @@ void Cheats::printPlayers() {
                 /*
                 No. | SL  | Name            | VIT | ATT | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World
                 01  | 125 | Mich            | 50  | 12  | 41  | 28  | 45  | 11  | 10  | 9   | Host         | 1034
-                */
 
+                Extras?
+                Steam Name
+                Steam Profile Link
+                Poise?
+                Rings?
+                Weapons?
+                Base Class?
+                Ping?
+                */
+                
                 float *Time_in_World = (float*)(CheatsASMFollow(Player + 0x30) + 0x20);
 
                 ConsoleWriteNLF(" %d  |", p);
@@ -945,7 +967,7 @@ void Cheats::printPlayers() {
                 ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x60));  // DEX
                 ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x88));  // RES
                 ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x70));  // FTH
-                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x78));  // INT (check this one)
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x78));  // INT
 
                 ConsoleWriteNLF(" %u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0xA4));   // SummonType
                 // Maybe a LUT or enum for this?
@@ -956,6 +978,5 @@ void Cheats::printPlayers() {
                 ConsoleWrite("%s Player %d is not populated", Mod::output_prefix, p);
             }
         }
-
     }
 }
