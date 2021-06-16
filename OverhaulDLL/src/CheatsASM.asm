@@ -6,6 +6,7 @@ extern stop_durability_damage_original_jump: qword
 
 PUBLIC CheatsASMFollow
 PUBLIC stop_durability_damage_hook
+PUBLIC GameMan_Get_bIgnoreLeaveMessagesHelper
 
 ; follows an address
 CheatsASMFollow PROC
@@ -69,6 +70,13 @@ stop_durability_damage_hook PROC
         jmp stop_durability_damage_original_jump    ; had to use a hopper & jmp as conditional jumps only support relative mode
 
 stop_durability_damage_hook ENDP
+
+GameMan_Get_bIgnoreLeaveMessagesHelper proc
+
+    mov rax, 1402C8C10h
+    call rax
+
+GameMan_Get_bIgnoreLeaveMessagesHelper endp
 
 _TEXT    ENDS
 

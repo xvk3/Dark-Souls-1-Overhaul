@@ -19,6 +19,7 @@ extern "C" {
     uint64_t stop_durability_damage_injection_return;
     uint64_t stop_durability_damage_original_jump;
     void stop_durability_damage_hook();
+    bool GameMan_Get_bIgnoreLeaveMessagesHelper();
 }
 
 void printBytes(uint64_t pointer, short rows_of_eight);
@@ -844,6 +845,11 @@ bool monitorCharacters(void* unused) {
     return true;
 }
 
+//GameMan_Get_bIgnoreLeaveMessages function @1402c8c10
+bool GameMan_Get_bIgnoreLeaveMessagesWrapper() {
+    return GameMan_Get_bIgnoreLeaveMessagesHelper();
+}
+
 void printBytes(uint64_t pointer, short rows_of_eight) {
 
     uint64_t tmp = pointer;
@@ -975,7 +981,7 @@ void Cheats::printPlayers() {
 
             }
             else {
-                ConsoleWrite("%s Player %d is not populated", Mod::output_prefix, p);
+                //ConsoleWrite("%s Player %d is not populated", Mod::output_prefix, p);
             }
         }
     }

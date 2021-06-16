@@ -39,6 +39,7 @@
 #define _DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_ "HollowChar"
 #define _DS1_OVERHAUL_HOTKEY_WARP_ "Warp"
 #define _DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_ "PrintPlayers"
+#define _DS1_OVERHAUL_HOTKEY_IGNORE_LEAVE_MESSAGES_ "IgnoreLeaveMessages"
 
 #define _DS1_OVERHAUL_SETTINGS_STRING_BUFF_LEN_ 256  // Length of the string buffer used when obtaining user preference-related string data
 

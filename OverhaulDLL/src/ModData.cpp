@@ -121,6 +121,7 @@ void Mod::get_user_keybinds()
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_, (int(*)())hollowChar);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_WARP_, (int(*)())warp);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_, (int(*)())Cheats::printPlayers);
+    get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_IGNORE_LEAVE_MESSAGES_, (int(*)())GameMan_Get_bIgnoreLeaveMessagesWrapper);
 
     // Enable the keybinds check
     MainLoop::setup_mainloop_callback(check_hotkeys, NULL, "check_hotkeys");

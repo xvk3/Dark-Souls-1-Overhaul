@@ -109,4 +109,6 @@ void stopDurabilityDamage();
 
 void updateBase();
 
+bool GameMan_Get_bIgnoreLeaveMessagesWrapper();
+
 #endif
