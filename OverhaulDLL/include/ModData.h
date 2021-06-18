@@ -26,6 +26,8 @@
 #define _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_ "FixHpBarSize"
 #define _DS1_OVERHAUL_PREF_CHEATS_ "EnableQoLCheats"
 #define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
+#define _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_ "IgnoreLeaveMessages"
+
 // Keybinds:
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_GOODS_CONSUME_ "ToggleGoodsConsume"
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_ARROW_CONSUME_ "ToggleArrowConsume"
@@ -39,7 +41,6 @@
 #define _DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_ "HollowChar"
 #define _DS1_OVERHAUL_HOTKEY_WARP_ "Warp"
 #define _DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_ "PrintPlayers"
-#define _DS1_OVERHAUL_HOTKEY_IGNORE_LEAVE_MESSAGES_ "IgnoreLeaveMessages"
 
 #define _DS1_OVERHAUL_SETTINGS_STRING_BUFF_LEN_ 256  // Length of the string buffer used when obtaining user preference-related string data
 
@@ -93,6 +94,9 @@ public:
 
     // Enables verbose messages
     static bool enable_verbose_messages;
+
+    // Disables "Leave Messages"
+    static bool disable_leave_messages;
 
     // Custom game archive files to load instead of the vanilla game files
     static std::wstring custom_game_archive_path;

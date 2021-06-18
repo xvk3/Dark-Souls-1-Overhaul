@@ -19,7 +19,14 @@ extern "C" {
     uint64_t stop_durability_damage_injection_return;
     uint64_t stop_durability_damage_original_jump;
     void stop_durability_damage_hook();
-    bool GameMan_Get_bIgnoreLeaveMessagesHelper();
+}
+
+// Ignore Leave Messages
+extern "C" {
+    uint64_t GameMan_base_bIgnoreLeaveMessages = 0x141D10E18;
+    void* GameMan_Ptr_bIgnoreLeaveMessages();
+    bool GameMan_Get_bIgnoreLeaveMessages();
+    bool GameMan_Set_bIgnoreLeaveMessages(byte state);
 }
 
 void printBytes(uint64_t pointer, short rows_of_eight);
@@ -111,6 +118,9 @@ void Cheats::start() {
 
     // Runs continiously and calls other functions when a character is loaded
     MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
+
+    // Print configuration preferences
+    printPreferences();
 
     ConsoleWriteDebug("%s -Cheats::start: completed\n", Mod::output_prefix);
 }
@@ -775,7 +785,16 @@ void delayedVariableUpdate() {
         RottenPineResin();
         GoldPineResin();
         stopDurabilityDamage();
+        ConsoleWriteDebug("%s --delayedVariableUpdate: QoL cheats enabled", Mod::output_prefix);
     }
+
+    // Set IgnoreLeaveMessages according to configuration
+    if (Mod::disable_leave_messages) {
+        printBytes((uint64_t)GameMan_Ptr_bIgnoreLeaveMessages(), 1);
+        ConsoleWriteDebug("%s --delayedVariableUpdate: bIgnoreLeaveMessages = %s", Mod::output_prefix, GameMan_Set_bIgnoreLeaveMessages(0xFF) ? "true" : "false");
+        printBytes((uint64_t)GameMan_Ptr_bIgnoreLeaveMessages(), 1);
+    }
+
     variablesUpdated = true;
     ConsoleWriteDebug("%s -delayedVariableUpdate: completed\n", Mod::output_prefix);
 }
@@ -843,11 +862,6 @@ bool monitorCharacters(void* unused) {
         }
     }
     return true;
-}
-
-//GameMan_Get_bIgnoreLeaveMessages function @1402c8c10
-bool GameMan_Get_bIgnoreLeaveMessagesWrapper() {
-    return GameMan_Get_bIgnoreLeaveMessagesHelper();
 }
 
 void printBytes(uint64_t pointer, short rows_of_eight) {
@@ -932,7 +946,8 @@ void printPreferences() {
     ConsoleWrite("%s UseSteamNames = %d", Mod::output_prefix, Mod::use_steam_names);
     ConsoleWrite("%s FixHpBarSize = %d", Mod::output_prefix, Mod::fix_hp_bar_size);
     ConsoleWrite("%s EnableQoLCheats = %d", Mod::output_prefix, Mod::enable_qol_cheats);
-    ConsoleWrite("%s VerboseMessages = %d\n", Mod::output_prefix, Mod::enable_verbose_messages);
+    ConsoleWrite("%s VerboseMessages = %d", Mod::output_prefix, Mod::enable_verbose_messages);
+    ConsoleWrite("%s DisableLeaveMessages = %d\n", Mod::output_prefix, Mod::disable_leave_messages);
 
 }
 
