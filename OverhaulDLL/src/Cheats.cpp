@@ -419,7 +419,7 @@ void GoldPineResin() {
     uint64_t GoldPineResin = CheatsASMFollow(BaseP + 0xF0);
     GoldPineResin = CheatsASMFollow(GoldPineResin + 0x38);
     GoldPineResin = GoldPineResin + 0x244C;
-    ConsoleWriteDebug("%s -GoldPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
+    ConsoleWriteDebug("%s -GoldPineResin = 0x%X", Mod::output_prefix, GoldPineResin);
 
     ConsoleWriteDebug("%s --GoldPineResin: modify_use_animation = 0x%X", Mod::output_prefix, GoldPineResin + 0x3E);
 
@@ -427,6 +427,26 @@ void GoldPineResin() {
     ConsoleWriteDebug("%s --GoldPineResin: different animation", Mod::output_prefix);
     ConsoleWriteDebug("%s -GoldPineResin: completed\n", Mod::output_prefix);
 }
+
+void RepairPowder() {
+
+    // ID = 280; Offset = 2110
+    byte modify_use_animation[1] = { 0x00 };        // Default use animation (Green Blossom style)
+
+    uint64_t RepairPowder = CheatsASMFollow(BaseP + 0xF0);
+    RepairPowder = CheatsASMFollow(RepairPowder + 0x38);
+    RepairPowder = RepairPowder + 0x2110;
+    ConsoleWriteDebug("%s -RepairPowder = 0x%X", Mod::output_prefix, RepairPowder);
+
+    ConsoleWriteDebug("%s --RepairPowder: modify_use_animation = 0x%X", Mod::output_prefix, RepairPowder + 0x3E);
+
+    memcpy((void*)(RepairPowder + 0x3E), modify_use_animation, 1);
+    ConsoleWriteDebug("%s --RepairPowder: different animation", Mod::output_prefix);
+    ConsoleWriteDebug("%s -RepairPowder: completed\n", Mod::output_prefix);
+
+}
+
+// Ring of Favor and Protection
 
 // noGoodsConsume
 void noGoodsConsumeToggle() {
@@ -784,6 +804,7 @@ void delayedVariableUpdate() {
         CharcoalPineResin();
         RottenPineResin();
         GoldPineResin();
+        RepairPowder();
         stopDurabilityDamage();
         ConsoleWriteDebug("%s --delayedVariableUpdate: QoL cheats enabled", Mod::output_prefix);
     }
