@@ -1,5 +1,59 @@
 # Dark Souls 1 PvP Fixes and Overhaul  
-  
+
+### Mich's TODO:
+ - [x] - Review DarkSoulsOverhaulMod.cpp
+ - [ ] - Parse "Session Info" using BaseX
+ - [ ] - Create a player class
+ - [x] - Create a "Dump memory" function
+ - [x] - Implement a "No-Durability Damage" function
+ - [x] - Implement a selective "NoGoodsConsume" function
+ - [x] - "NoGoodsConsume" doesn't stay "On/Off" when the character is reloaded
+ - [x] - Implement a selective "NoArrowConsume" function 
+ - [x] - Implement a "EventSuperArmour" function
+ - [ ] - Can hotkeys have multiple functions?
+ - [ ] - Optimise updateVariables()
+ - [ ] - Add ability to change "Last Bonfire" (popup? hotkeys?)
+ - [x] - Use xvk3/Cpp-Utilities (need to change submodule configuration)
+ - [ ] - Fix the crash that occurs when Discord is open when the game starts
+ - [ ] - Implement a momentary speedhack function tied to a hotkey
+ - [x] - Implement a "Hollow Char" (Opposite of "Revive Char")
+ - [ ] - Implement "Fly mode" 
+ - [ ] - Implement "No Collision"
+ - [x] - Implement "No Gravity"
+ - [ ] - PvP Area Coordinates + Photos
+ - [x] - Tidy up CheatsASM.asm
+ - [ ] - Find and enable gesture roll cancelling in Legacy mode
+ - [ ] - Improve the hotkeys
+ - [ ] - Replace references to CheatsASMFollow with multi-level pointer dereferences (sp::mem::pointer?)
+ - [x] - Confirm all cheats write the correct number of bytes to the address (noHUD was overwriting other data)
+ - [ ] - Record the different SummonTypes over the weekend (for use in printPlayers)
+ - [ ] - Test bIgnoreLeaveMessages over the weekend
+ - [ ] - Add the rest of the TODOs
+
+### Git Stuff
+xvk3/master should track metal-crow/WIP
+xvk3/Merging is for combining xvk3/master and metal-crow/WIP
+xvk3/Mich is for my changes
+
+1. git checkout master
+2. git pull https://www.github.com/metal-crow/Dark-Souls-1-Overhaul.git WIP
+^ Makes xvk3/master = metal-crow/WIP
+
+1. git checkout Merging
+2. git reset --hard master    // sets xvk3/Merging to xvk3/master (which is metal-crow/WIP)
+3. git push origin Merging
+^ Makes xvk3/Merging = xvk3/master
+
+1. git merge Mich
+2. Resolve the merge conflicts
+3. git commit
+^ Merge xvk3/Mich into xvk3/Merging
+
+1. git checkout Best
+2. git reset --hard Merging
+3. git push origin Best
+^ Move the good merged branch Best
+
 ### Info Google doc (notes and RE'd knowledge goes here):  
 https://drive.google.com/drive/folders/0BzSQv5PaltE-ci1LaDh5MDRId2M  
   

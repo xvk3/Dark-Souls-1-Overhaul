@@ -575,7 +575,7 @@ void Files::set_save_file_index(int unsigned index)
         *Game::get_saved_chars_menu_flag().value() = 3;
     }
     if (debug_save_print_output) {
-        global::cmd_out << ("Save file index changed to " + std::to_string(index));
+        global::cmd_out << ("Save file index changed to " + std::to_string(index) + "\n");
     }
     SetLastError(ERROR_SUCCESS);
 }

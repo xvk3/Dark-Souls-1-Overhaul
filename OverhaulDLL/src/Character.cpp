@@ -35,12 +35,15 @@ Character* Character::update(uint64_t PlayerBase) {
 }
 
 char* Character::name() {
-    //if (this->_name) {
-    //    return this->_name;
-    //}
-    //else {
-        return this->_name = (char*)CheatsASMFollow(this->_base + 0x578) + 0xAB;
-    //}
+    return (char*)CheatsASMFollow(this->_base + 0x578) + 0xAB;
+}
+
+char* name(uint64_t Player) {
+    return (char*)CheatsASMFollow(Player + 0x578) + 0xA8;
+}
+
+char* Character::steam_name() {
+    return (char*)CheatsASMFollow(this->_base + 0x590) + 0x58;
 }
 
 int Character::maxHP() {

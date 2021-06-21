@@ -21,10 +21,12 @@ class Character
 
 public:
 
-    uint64_t _rawBase = NULL;
-    uint64_t _base    = NULL;
-    short    _index   = 0x00;
-    char*    _name    = NULL;
+    // Variables / Members
+    uint64_t _rawBase    = NULL;
+    uint64_t _base       = NULL;
+    short    _index      = 0x00;
+    char*    _name       = NULL;
+    char*    _steam_name = NULL;
 
     ATTRIBUTES _attributes = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
@@ -34,6 +36,7 @@ public:
 
     static const short character_index_to_offset_multiplier = 0x38;
 
+    // Constructor & Destructor
     Character(int foo);
     ~Character();
 
@@ -58,8 +61,16 @@ public:
     int curHP();
 
     char* name();
+    char* steam_name();
 
 };
+
+int maxHP();
+int curHP();
+
+char* name();
+char* steam_name();
+
 
 
 #endif // CHAR_DSR_CHARACTER_CLASS_H_
