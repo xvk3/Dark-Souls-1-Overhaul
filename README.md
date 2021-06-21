@@ -28,6 +28,8 @@
  - [x] - Confirm all cheats write the correct number of bytes to the address (noHUD was overwriting other data)
  - [ ] - Record the different SummonTypes over the weekend (for use in printPlayers)
  - [ ] - Test bIgnoreLeaveMessages over the weekend
+ - [ ] - Warp to Undead Burg hotkey (changing Last Bonfire)
+ - [ ] - Speedhack after death until loading screen? (speeds up your death animation - to get home quicker)
  - [ ] - Add the rest of the TODOs
 
 ### Git Stuff
