@@ -42,6 +42,8 @@ inline void bittog(uint64_t ptr, short bit);
 
 bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
+bool speedhackOnDeath(void* unused);
+
 void delayedVariableUpdate();
 void printPreferences();
 void printPosition();
@@ -81,6 +83,7 @@ Character P5 = { 0x00 };
 
 bool prev_playerchar_is_loaded = false;
 bool variablesUpdated = false;
+bool speedhackActivated = false;
 
 Cheats::Cheats()
 {
@@ -118,6 +121,12 @@ void Cheats::start() {
 
     // Runs continiously and calls other functions when a character is loaded
     MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
+
+    // Runs continiously monitoring curHP and activating speedhack when player is dead
+    // TODO: fix crashing
+    // I think it's because curHP results in a nullptr during the loading screen after death
+    // Need to hold off running code until the character is back loaded.
+    //MainLoop::setup_mainloop_callback(speedhackOnDeath, NULL, "speedhackOnDeath");
 
     // Print configuration preferences
     printPreferences();
@@ -618,6 +627,41 @@ int noHUDSet(bool state) {
 
 // No Collision
 // Fly mode
+
+bool speedhackOnDeath(void* unused) {
+
+
+    if (BaseX && Game::playerchar_is_loaded()) {
+
+        sp::mem::pointer tmp;
+        tmp.set_base((void*)((uint64_t)BaseX + 0x68));
+        uint64_t curHP = (uint64_t)tmp.resolve();
+
+        if (*(uint32_t*)curHP == 0x00) {
+            if (speedhackActivated == false) {
+
+                ConsoleWriteDebug("%s -speedhackOnDeath: entered", Mod::output_prefix);
+                ConsoleWriteDebug("%s --speedHackOnDeath: curHP = %d", Mod::output_prefix, *(uint32_t*)curHP);
+                ConsoleWriteDebug("%s --speedHackOnDeath: curHP = 0x%X", Mod::output_prefix, curHP);
+
+                uint64_t ptr = CheatsASMFollow(BaseX + 0x68);
+                ConsoleWriteDebug("%s --speedHackOnDeath: ptr0 = 0x%X", Mod::output_prefix, ptr);
+
+                ptr = CheatsASMFollow(ptr + 0x68);
+                ConsoleWriteDebug("%s --speedHackOnDeath: ptr1 = 0x%X", Mod::output_prefix, ptr);
+
+                uint64_t speedModifier = CheatsASMFollow(ptr + 0x18) + 0xA8;
+                ConsoleWriteDebug("%s --speedHackOnDeath: speedModifier = 0x%X", Mod::output_prefix, speedModifier);
+
+                *(float*)speedModifier = 5.0f;
+                speedhackActivated = true;
+            }
+        } else {
+            speedhackActivated = false;
+        }
+    }
+    return true;
+}
 
 void reviveChar() {
     ConsoleWriteDebug("%s -reviveChar: entered", Mod::output_prefix);
