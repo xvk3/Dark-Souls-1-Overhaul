@@ -33,7 +33,6 @@
 extern HMODULE d3d11_module;
 
 DWORD WINAPI on_process_attach_async(LPVOID lpParam);
-DWORD WINAPI wait_for_first_char_load(LPVOID lpParam);
 
 void inline FATALERROR(const char* error_str, ...) {
     char dest[1024];
@@ -42,11 +41,21 @@ void inline FATALERROR(const char* error_str, ...) {
     vsnprintf(dest, 1024, error_str, argptr);
     va_end(argptr);
 
+    global::cmd_out << dest << "\n";
+
     crash_handler(dest);
 }
 
+static const char* logfilename = "dsoverhaul_logging.txt";
+extern FILE* logfile;
+
 void inline ConsoleWrite(const char* str, ...)
 {
+    if (logfile == NULL)
+    {
+        fopen_s(&logfile, logfilename, "w");
+    }
+
     char dest[1024];
     va_list argptr;
     va_start(argptr, str);
@@ -54,7 +63,10 @@ void inline ConsoleWrite(const char* str, ...)
     va_end(argptr);
 
     global::cmd_out << dest << "\n";
+
+    fprintf(logfile, "%s\n", dest);
 }
+
 
 void inline ConsoleWriteNLF(const char* str, ...)
 {

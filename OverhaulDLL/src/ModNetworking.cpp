@@ -5,10 +5,10 @@
 #include "AnimationEdits.h"
 #include <wchar.h>
 
-bool ModNetworking::allow_connect_with_non_mod_host = false;
-bool ModNetworking::allow_connect_with_legacy_mod_host = false;
-bool ModNetworking::allow_connect_with_overhaul_mod_host = false;
-bool ModNetworking::allow_connect_with_non_mod_guest = false;
+bool ModNetworking::allow_connect_with_non_mod_host = true;
+bool ModNetworking::allow_connect_with_legacy_mod_host = true;
+bool ModNetworking::allow_connect_with_overhaul_mod_host = true;
+bool ModNetworking::allow_connect_with_non_mod_guest = true;
 
 bool ModNetworking::host_mod_installed = false;
 bool ModNetworking::host_legacy_enabled = false;
@@ -74,7 +74,7 @@ extern "C" {
 
 void ModNetworking::start()
 {
-    global::cmd_out << (Mod::output_prefix + "Enabling mod networking...\n");
+    ConsoleWrite("Enabling mod networking...");
 
     uint8_t *write_address;
 
@@ -238,7 +238,8 @@ void ParseRawP2PPacketType_injection_helper(uint8_t* data, uint64_t steamId_remo
             // compute the 1 way latency
             uint64_t ping = (Game::get_accurate_time() - ModNetworking::hostTimerSyncronizationData[steamId_remote].timePingPacketSent);
             // TODO should update this as a running average of some kind
-            ModNetworking::hostTimerSyncronizationData[steamId_remote].packetDelay = ping / 2;
+            // TMP: disable till calculation is fixed
+            //ModNetworking::hostTimerSyncronizationData[steamId_remote].packetDelay = ping / 2;
             // sanity check the computed latency
             if (ping > SaneDelay)
             {
@@ -258,7 +259,8 @@ void ParseRawP2PPacketType_injection_helper(uint8_t* data, uint64_t steamId_remo
                 void* SteamInternal = (*SteamInternal_ContextInit)(Init_SteamInternal_FUNCPTR);
                 uint64_t SteamNetworking = *(uint64_t*)((uint64_t)SteamInternal + 0x40);
                 SteamInternal_SteamNetworkingSend_FUNC* SteamNetworkingSend = (SteamInternal_SteamNetworkingSend_FUNC*)**(uint64_t**)SteamNetworking;
-                SteamNetworkingSend((void*)SteamNetworking, steamId_remote, updatebuf, sizeof(updatebuf), 2, 0); //if this fails to send we'll just resend in 15 sec anyway
+                // TMP: disable till calculation is fixed
+                //SteamNetworkingSend((void*)SteamNetworking, steamId_remote, updatebuf, sizeof(updatebuf), 2, 0); //if this fails to send we'll just resend in 15 sec anyway
 
                 //update our sync time with this guest
                 ModNetworking::hostTimerSyncronizationData[steamId_remote].timeOfLastResync = Game::get_accurate_time();
@@ -402,7 +404,7 @@ void HostForceDisconnectSession(void* SteamSessionMemberLight, const wchar_t* dc
 
     if (SteamInternal == NULL)
     {
-        global::cmd_out << "Unable to disconnect player: unable to create SteamInternal\n";
+        ConsoleWrite("Unable to disconnect player: unable to create SteamInternal");
         return;
     }
 
@@ -415,7 +417,7 @@ void HostForceDisconnectSession(void* SteamSessionMemberLight, const wchar_t* dc
     bool success = SteamNetworkingSend((void*)SteamNetworking, steamid, data_buf, sizeof(data_buf), 2, 0);
     if (!success)
     {
-        global::cmd_out << "Unable to disconnect player: error return val from SteamNetworkingSend\n";
+        ConsoleWrite("Unable to disconnect player: error return val from SteamNetworkingSend");
     }
 
     //TODO also set variables in this SessionMember struct to disable the connection locally

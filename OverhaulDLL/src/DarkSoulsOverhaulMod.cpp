@@ -29,6 +29,7 @@
 #include "Cheats.h"
 
 HMODULE d3d11_module;
+FILE* logfile = NULL;
 
 /*
     Called from DllMain when the plugin DLL is first loaded into memory (PROCESS_ATTACH case).
@@ -104,7 +105,7 @@ DWORD WINAPI on_process_attach_async(LPVOID lpParam)
 
     Cheats::start();
 
-    ConsoleWrite("%s All initial loading finished!", Mod::output_prefix);
+    ConsoleWrite("All initial loading finished!");
 
     // Start callback for first character loading injections
     MainLoop::setup_mainloop_callback(Game::on_character_load, NULL, "on_character_load");
