@@ -49,6 +49,9 @@ bool Mod::enable_qol_cheats = false;
 // Enables verbose messages
 bool Mod::enable_verbose_messages = false;
 
+// Disables "Leave Messages"
+bool Mod::disable_leave_messages = false;
+
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
 
@@ -93,6 +96,8 @@ void Mod::get_init_preferences()
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+    Mod::disable_leave_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_, (int)Mod::disable_leave_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+
 }
 
 bool check_hotkeys(void* unused)
@@ -122,7 +127,7 @@ void Mod::get_user_keybinds()
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_, (int(*)())hollowChar);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_WARP_, (int(*)())warp);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_, (int(*)())Cheats::printPlayers);
-
+    
     // Enable the keybinds check
     MainLoop::setup_mainloop_callback(check_hotkeys, NULL, "check_hotkeys");
 }
