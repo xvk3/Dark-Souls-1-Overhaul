@@ -1158,6 +1158,12 @@ bool Game::set_display_name(bool useSteam)
 
     if (display_name_cache)
     {
+        /*ConsoleWrite("Setting display name setting... ds1_base            0x%X", Game::ds1_base);
+        ConsoleWrite("Setting display name setting... game_data_man       0x%X", Game::game_data_man);
+        ConsoleWrite("Setting display name setting... *game_data_man      0x%X", *(uint64_t*)Game::game_data_man);
+        ConsoleWrite("Setting display name setting... display_name_cache  0x%X", display_name_cache);
+        ConsoleWrite("Setting display name setting... game_data_man+0x58  0x%X", Game::game_data_man+0x58);
+        ConsoleWrite("Setting display name setting... *game_data_man+0x58 0x%X", *(uint64_t*)(Game::game_data_man+0x58));*/
         *display_name_cache = useSteam;
         return true;
     }
@@ -1170,6 +1176,13 @@ bool Game::set_display_name(bool useSteam)
     else
     {
         display_name_cache = display_name.resolve();
+        /*ConsoleWrite("Setting display name setting... ds1_base            0x%X", Game::ds1_base);
+        ConsoleWrite("Setting display name setting... game_data_man       0x%X", Game::game_data_man);
+        ConsoleWrite("Setting display name setting... *game_data_man      0x%X", *(uint64_t*)Game::game_data_man);
+        ConsoleWrite("Setting display name setting... display_name_cache  0x%X", display_name_cache);
+        ConsoleWrite("Setting display name setting... game_data_man+0x58  0x%X", Game::game_data_man + 0x58);
+        ConsoleWrite("Setting display name setting... *game_data_man+0x58 0x%X", *(uint64_t*)(Game::game_data_man + 0x58));
+        ConsoleWrite("*display_name_cache = %d", *(char*)display_name_cache);*/
         *display_name_cache = useSteam;
         return true;
     }

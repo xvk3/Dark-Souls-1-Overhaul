@@ -42,6 +42,7 @@ public:
     // Functions
     static bool applyCheats();
     static void printPlayers();
+    static void printMessage();
 
     // Cheats
     static CHEAT noGoodsConsume;    // ToggleGoodsConsume
@@ -69,6 +70,7 @@ void DriedFinger();
 void CharcoalPineResin();
 void RottenPineResin();
 void GoldPineResin();
+void RepairPowder();
 
 void noGoodsConsumeToggle();
 void noGoodsConsumeApply();
@@ -109,4 +111,4 @@ void stopDurabilityDamage();
 
 void updateBase();
 
-#endif
+#endif // _DS1_OVERHAUL_CHEATS_H_
