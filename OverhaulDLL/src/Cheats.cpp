@@ -853,6 +853,10 @@ void delayedVariableUpdate() {
 
     variablesUpdated = true;
     ConsoleWriteDebug("-delayedVariableUpdate: completed\n");
+
+    wchar_t dc_msg[300];
+    swprintf(dc_msg, 300, L"Delayed Variable Update Completed");
+    Game::show_popup_message(dc_msg);
 }
 
 void updateBase() {
@@ -1004,6 +1008,14 @@ void printPreferences() {
     ConsoleWrite("EnableQoLCheats = %d", Mod::enable_qol_cheats);
     ConsoleWrite("VerboseMessages = %d", Mod::enable_verbose_messages);
     ConsoleWrite("DisableLeaveMessages = %d\n", Mod::disable_leave_messages);
+
+}
+
+void Cheats::printMessage() {
+
+    wchar_t dc_msg[300];
+    swprintf(dc_msg, 300, L"I'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich");
+    Game::show_popup_message(dc_msg);
 
 }
 

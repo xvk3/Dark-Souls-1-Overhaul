@@ -42,6 +42,7 @@ public:
     // Functions
     static bool applyCheats();
     static void printPlayers();
+    static void printMessage();
 
     // Cheats
     static CHEAT noGoodsConsume;    // ToggleGoodsConsume
