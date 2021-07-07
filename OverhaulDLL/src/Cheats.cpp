@@ -154,7 +154,7 @@ bool Cheats::applyCheats() {
 void RedEyeOrb() {
 
     // ID = 102; Offset = 0xDA8;
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -178,7 +178,7 @@ void RedEyeOrb() {
 void EyeOfDeath() {
 
     // ID = 109; Offset = F18
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -222,7 +222,7 @@ void GreenBlossom() {
 void RedSignSoapstone() {
 
     //ID = 101; Offset = D4C
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
 
     uint64_t RedSignSoapstone = CheatsASMFollow(BaseP + 0xF0);
     RedSignSoapstone = CheatsASMFollow(RedSignSoapstone + 0x38);
@@ -239,18 +239,18 @@ void RedSignSoapstone() {
 void CrackedRedEyeOrb() {
 
     // ID = 111; Offset = F74
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
     byte opmeMenuType_patch[1] = { 0x00 };
     /* first two bytes are "vowType"s
-    bit                  0x63   0xC3    0xBF
-    0 = enable_live        1      1       1
-    1 = enable_grey        1      1       1
-    2 = enable_white       0      0       1
-    3 = enable_black       0      0       1
-    4 = enable_multi       0      0       1
-    5 = disable_offline    1      0       1
-    6 = isEquip            1      1       0
-    7 = isConsume          0      1       1
+    bit                  0x63   0xC3    0xBF    0xC4
+    0 = enable_live        1      1       1       1
+    1 = enable_grey        1      1       1       1
+    2 = enable_white       0      0       1       0
+    3 = enable_black       0      0       1       0
+    4 = enable_multi       0      0       1       0
+    5 = disable_offline    1      0       1       1
+    6 = isEquip            1      1       0       0
+    7 = isConsume          0      1       1       0
     */
 
     uint64_t CrackedRedEyeOrb = CheatsASMFollow(BaseP + 0xF0);
