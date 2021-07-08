@@ -30,6 +30,7 @@
  - [ ] - Test bIgnoreLeaveMessages over the weekend
  - [ ] - Warp to Undead Burg hotkey (changing Last Bonfire)
  - [ ] - Speedhack after death until loading screen? (speeds up your death animation - to get home quicker)
+ - [ ] - BasePify RedesignedMultiplayerItems.CT
  - [ ] - Add the rest of the TODOs
 
 ### Git Stuff

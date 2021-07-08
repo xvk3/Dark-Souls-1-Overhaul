@@ -455,6 +455,16 @@ void RepairPowder() {
 
 }
 
+void RingOfFavorAndProtection() {
+
+    return;
+    uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
+    ConsoleWriteDebug("-RingOfFavorAndProtection = 0x%X", RingOfFavorAndProtection);
+    bitset(RingOfFavorAndProtection + 0x3C, 1);
+    ConsoleWrite("--RingOfFavorAndProtection: doesn't break on unequip");
+    ConsoleWrite("-RingOfFavorAndProtection: completed\n");
+}
+
 // Ring of Favor and Protection
 
 // noGoodsConsume
@@ -841,6 +851,7 @@ void delayedVariableUpdate() {
         GoldPineResin();
         RepairPowder();
         stopDurabilityDamage();
+        RingOfFavorAndProtection();
         ConsoleWriteDebug("--delayedVariableUpdate: QoL cheats enabled");
     }
 
@@ -1013,8 +1024,31 @@ void printPreferences() {
 
 void Cheats::printMessage() {
 
-    wchar_t dc_msg[300];
-    swprintf(dc_msg, 300, L"I'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich\nI'm Mich");
+    // 9 rows max
+
+    char buf[1000];
+    wchar_t dc_msg[1000];
+    DWORD dwRead = 0;
+
+    ConsoleWrite(Mod::message_file_location);
+
+    HANDLE hFile = CreateFile(Mod::message_file_location, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        ConsoleWriteDebug("CreateFile error");
+        return;
+    }
+
+    if (!ReadFile(hFile, buf, 1000, &dwRead, NULL)) {
+        ConsoleWriteDebug("ReadFile error");
+        return;
+    }
+
+    CloseHandle(hFile);
+
+    for (int position = 0; position < dwRead; position++)
+        dc_msg[position] = (wchar_t)buf[position];
+  
+    //swprintf(dc_msg, 1000, L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ\niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\n3\n4\n5\n6\n7\n8\n9\n10\n");
     Game::show_popup_message(dc_msg);
 
 }

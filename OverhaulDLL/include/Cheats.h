@@ -71,6 +71,7 @@ void CharcoalPineResin();
 void RottenPineResin();
 void GoldPineResin();
 void RepairPowder();
+void RingOfFavorAndProtection();
 
 void noGoodsConsumeToggle();
 void noGoodsConsumeApply();

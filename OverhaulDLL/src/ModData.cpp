@@ -52,6 +52,9 @@ bool Mod::enable_verbose_messages = false;
 // Disables "Leave Messages"
 bool Mod::disable_leave_messages = false;
 
+// MessageFileLocation
+char Mod::message_file_location[MAX_PATH];
+
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
 
@@ -97,6 +100,9 @@ void Mod::get_init_preferences()
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::disable_leave_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_, (int)Mod::disable_leave_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+    if (GetPrivateProfileString(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_MESSAGE_FILE_LOCATION_, Mod::message_file_location, Mod::message_file_location, MAX_PATH, _DS1_OVERHAUL_SETTINGS_FILE_) < 1) {
+        ConsoleWrite("ModData.cpp:GetPrivateProfileString error");
+    }
 
 }
 
@@ -216,6 +222,7 @@ void Mod::get_custom_game_files()
     {
         ConsoleWrite("Found custom game config file definition: \"%s\"",custom_file_name_buff);
     }
+
 }
 
 // Change the legacy mode, and also reload the files that we modify now that we're using the original/new ones

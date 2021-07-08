@@ -27,6 +27,7 @@
 #define _DS1_OVERHAUL_PREF_CHEATS_ "EnableQoLCheats"
 #define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
 #define _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_ "IgnoreLeaveMessages"
+#define _DS1_OVERHAUL_MESSAGE_FILE_LOCATION_ "MessageFileLocation"
 
 // Keybinds:
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_GOODS_CONSUME_ "ToggleGoodsConsume"
@@ -98,6 +99,8 @@ public:
 
     // Disables "Leave Messages"
     static bool disable_leave_messages;
+
+    static char message_file_location[MAX_PATH];
 
     // Custom game archive files to load instead of the vanilla game files
     static std::wstring custom_game_archive_path;
