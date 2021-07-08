@@ -100,6 +100,7 @@ public:
     // Disables "Leave Messages"
     static bool disable_leave_messages;
 
+    // MessageFileLocation
     static char message_file_location[MAX_PATH];
 
     // Custom game archive files to load instead of the vanilla game files

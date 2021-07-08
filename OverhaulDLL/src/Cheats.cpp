@@ -1019,6 +1019,7 @@ void printPreferences() {
     ConsoleWrite("EnableQoLCheats = %d", Mod::enable_qol_cheats);
     ConsoleWrite("VerboseMessages = %d", Mod::enable_verbose_messages);
     ConsoleWrite("DisableLeaveMessages = %d\n", Mod::disable_leave_messages);
+    ConsoleWrite("MessageFileLocation = %s\n", Mod::message_file_location);
 
 }
 

@@ -61,7 +61,6 @@ std::wstring Mod::custom_game_archive_path;
 // Custom game configuration file to load instead of the vanilla file
 std::wstring Mod::custom_config_file_path;
 
-
 // Get user-defined startup preferences from the settings file
 void Mod::get_init_preferences()
 {
@@ -135,7 +134,6 @@ void Mod::get_user_keybinds()
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_, (int(*)())Cheats::printPlayers);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_MESSAGE_, (int(*)())Cheats::printMessage);
 
-    
     // Enable the keybinds check
     MainLoop::setup_mainloop_callback(check_hotkeys, NULL, "check_hotkeys");
 }
