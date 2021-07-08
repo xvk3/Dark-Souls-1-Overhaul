@@ -44,8 +44,6 @@ bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
 bool speedhackOnDeath(void* unused);
 
-void LoadingScreenItems();
-
 void delayedVariableUpdate();
 void printPreferences();
 void printPosition();
@@ -374,7 +372,7 @@ void DriedFinger() {
 
     // ID = 385; Offset = 2AC4;
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
-    byte modify_sfx_variation[4] = { 0x5C };        // Purple Cowards Crystal SFX
+    byte modify_sfx_variation[1] = { 0x5C };        // Purple Cowards Crystal SFX
 
     uint64_t DriedFinger = CheatsASMFollow(BaseP + 0xF0);
     DriedFinger = CheatsASMFollow(DriedFinger + 0x38);
@@ -386,8 +384,8 @@ void DriedFinger() {
 
     memcpy((void*)(DriedFinger + 0x3E), modify_use_animation, 1);
     memcpy((void*)(DriedFinger + 0x04), modify_sfx_variation, 1);
-    ConsoleWriteDebug("--DriedFinger: different animation, different SFX", Mod::output_prefix);
-    ConsoleWriteDebug("-DriedFinger: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--DriedFinger: different animation, different SFX");
+    ConsoleWriteDebug("-DriedFinger: completed\n");
 }
 
 void CharcoalPineResin() {
@@ -457,6 +455,59 @@ void RepairPowder() {
     memcpy((void*)(RepairPowder + 0x3E), modify_use_animation, 1);
     ConsoleWriteDebug("--RepairPowder: different animation");
     ConsoleWriteDebug("-RepairPowder: completed\n");
+
+}
+
+void EstusFlask() {
+
+    // ID = 215; Offset = 1D78
+    byte modify_sfx_variation[1] = { 0x0A };        // Green Blossom SFX
+
+    uint64_t EstusFlask = CheatsASMFollow(BaseP + 0xF0);
+    EstusFlask = CheatsASMFollow(EstusFlask + 0x38);
+    EstusFlask = EstusFlask + 0x1D78;
+    ConsoleWriteDebug("-EstusFlask = 0x%X", EstusFlask);
+
+    ConsoleWriteDebug("--EstusFlask: modify_sfx_animation = 0x%X", EstusFlask + 0x04);
+
+    memcpy((void*)(EstusFlask + 0x04), modify_sfx_variation, 1);
+    ConsoleWriteDebug("--EstusFlask: different SFX");
+    ConsoleWriteDebug("-EstusFlask: completed\n");
+
+}
+
+void EggVermifuge() {
+
+    // ID = 275; Offset = 20B4
+    byte modify_use_animation[1] = { 0x01 };        // Resin animation
+    byte modify_sfx_variation[1] = { 0x0A };        // Green Blossom SFX
+
+    uint64_t EggVermifuge = CheatsASMFollow(BaseP + 0xF0);
+    EggVermifuge = CheatsASMFollow(EggVermifuge + 0x38);
+    EggVermifuge = EggVermifuge + 0x20B4;
+    ConsoleWriteDebug("-EggVermifuge = 0x%X", EggVermifuge);
+
+    ConsoleWriteDebug("--EggVermifuge: modify_use_animation = 0x%X", EggVermifuge + 0x3E);
+    ConsoleWriteDebug("--EggVermifuge: modify_sfx_animation = 0x%X", EggVermifuge + 0x04);
+
+    memcpy((void*)(EggVermifuge + 0x3E), modify_use_animation, 1);
+    memcpy((void*)(EggVermifuge + 0x04), modify_sfx_variation, 1);
+    ConsoleWriteDebug("--EggVermifuge: different animation, different SFX");
+    ConsoleWriteDebug("-EggVermifuge: completed\n");
+
+}
+
+void GoldCoin() {
+
+    // ID = 383; Offset = 2A0C
+    // Can this be made edible?
+
+}
+
+void PerculiarDoll() {
+
+    // ID = 384; Offset = 2A68
+    // Does this have a 3D model?
 
 }
 
@@ -874,6 +925,10 @@ void delayedVariableUpdate() {
         RottenPineResin();
         GoldPineResin();
         RepairPowder();
+        EstusFlask();
+        EggVermifuge();
+        GoldCoin();
+        PerculiarDoll();
         RingOfFavorAndProtection();
         stopDurabilityDamage();
         ConsoleWriteDebug("--delayedVariableUpdate: QoL cheats enabled");

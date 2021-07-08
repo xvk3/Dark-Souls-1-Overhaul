@@ -71,7 +71,12 @@ void CharcoalPineResin();
 void RottenPineResin();
 void GoldPineResin();
 void RepairPowder();
+void EstusFlask();
+void EggVermifuge();
+void GoldCoin();
+void PerculiarDoll();
 void RingOfFavorAndProtection();
+void LoadingScreenItems();
 
 void noGoodsConsumeToggle();
 void noGoodsConsumeApply();
