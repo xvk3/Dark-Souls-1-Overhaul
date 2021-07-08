@@ -44,6 +44,8 @@ bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
 bool speedhackOnDeath(void* unused);
 
+void LoadingScreenItems();
+
 void delayedVariableUpdate();
 void printPreferences();
 void printPosition();
@@ -115,6 +117,9 @@ void Cheats::start() {
     // Initialise Homeward
     Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
     ConsoleWriteDebug("--Cheats::start: Homeward    = 0x%X", Homeward);
+
+    // Change the loading screen items to all be Green Blossom
+    LoadingScreenItems();
 
     // Runs until a character is loaded, then updates a couple of pointers and never runs again
     MainLoop::setup_mainloop_callback(delayedVariableUpdateWrapper, NULL, "delayedVariableUpdate");
@@ -458,14 +463,33 @@ void RepairPowder() {
 void RingOfFavorAndProtection() {
 
     return;
-    uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
-    ConsoleWriteDebug("-RingOfFavorAndProtection = 0x%X", RingOfFavorAndProtection);
+
+    // Problem with this function, can't seem to get it working
+
+    uint64_t RingOfFavorAndProtection = CheatsASMFollow(BaseP + 0xF0);
+    RingOfFavorAndProtection = RingOfFavorAndProtection - 0x300a3d4;
+
+    ConsoleWriteDebug("-RingOfFavorAndProtection0 = 0x%X", RingOfFavorAndProtection);
+
     bitset(RingOfFavorAndProtection + 0x3C, 1);
     ConsoleWrite("--RingOfFavorAndProtection: doesn't break on unequip");
     ConsoleWrite("-RingOfFavorAndProtection: completed\n");
 }
 
-// Ring of Favor and Protection
+void LoadingScreenItems() {
+
+    uint64_t LoadingScreenItems = 0x141ACE7B0;
+
+    ConsoleWriteDebug("-LoadingScreenItems = 0x%X", LoadingScreenItems);
+
+    for (uint64_t offset = 0x00; offset < 0xF8; offset += 0x04) {
+        *(uint32_t*)(LoadingScreenItems + offset) = 0x40000104;
+    }
+
+    ConsoleWriteDebug("-LoadingScreenItems: Green Blossom only");
+    ConsoleWriteDebug("-LoadingScreenItems: completed\n");
+
+}
 
 // noGoodsConsume
 void noGoodsConsumeToggle() {
@@ -850,8 +874,8 @@ void delayedVariableUpdate() {
         RottenPineResin();
         GoldPineResin();
         RepairPowder();
-        stopDurabilityDamage();
         RingOfFavorAndProtection();
+        stopDurabilityDamage();
         ConsoleWriteDebug("--delayedVariableUpdate: QoL cheats enabled");
     }
 
@@ -1018,7 +1042,7 @@ void printPreferences() {
     ConsoleWrite("FixHpBarSize = %d", Mod::fix_hp_bar_size);
     ConsoleWrite("EnableQoLCheats = %d", Mod::enable_qol_cheats);
     ConsoleWrite("VerboseMessages = %d", Mod::enable_verbose_messages);
-    ConsoleWrite("DisableLeaveMessages = %d\n", Mod::disable_leave_messages);
+    ConsoleWrite("DisableLeaveMessages = %d", Mod::disable_leave_messages);
     ConsoleWrite("MessageFileLocation = %s\n", Mod::message_file_location);
 
 }
