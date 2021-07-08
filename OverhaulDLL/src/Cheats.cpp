@@ -21,8 +21,18 @@ extern "C" {
     void stop_durability_damage_hook();
 }
 
+// Ignore Leave Messages
+extern "C" {
+    uint64_t GameMan_base_bIgnoreLeaveMessages = 0x141D10E18;
+    void* GameMan_Ptr_bIgnoreLeaveMessages();
+    bool GameMan_Get_bIgnoreLeaveMessages();
+    bool GameMan_Set_bIgnoreLeaveMessages(byte state);
+}
+
 void printBytes(uint64_t pointer, short rows_of_eight);
 void printByte(uint64_t pointer);
+void printByteRaw(uint64_t pointer);
+byte returnByteRaw(uint64_t pointer);
 
 inline bool bitTest(uint64_t pointer, short bit);
 inline void bitmod(uint64_t ptr, short bit, bool value);
@@ -32,8 +42,11 @@ inline void bittog(uint64_t ptr, short bit);
 
 bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
+bool speedhackOnDeath(void* unused);
+
 void delayedVariableUpdate();
 void printPreferences();
+void printPosition();
 
 // Variables
 uint64_t BaseXOffset = 0x00;
@@ -70,6 +83,7 @@ Character P5 = { 0x00 };
 
 bool prev_playerchar_is_loaded = false;
 bool variablesUpdated = false;
+bool speedhackActivated = false;
 
 Cheats::Cheats()
 {
@@ -81,33 +95,26 @@ Cheats::~Cheats()
 
 void Cheats::start() {
 
-    ConsoleWriteDebug("%s -Cheats::start: entered", Mod::output_prefix);
+    ConsoleWriteDebug("-Cheats::start: entered");
 
     // For information
-    ConsoleWriteDebug("%s --Cheats::start: ds1_base    = 0x%X", Mod::output_prefix, Game::ds1_base);
+    ConsoleWriteDebug("--Cheats::start: ds1_base    = 0x%X", Game::ds1_base);
 
     // Initialise BaseXOffset
     BaseXOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 48 39 48 68 0F 94 C0 C3");
-    ConsoleWriteDebug("%s --Cheats::start: BaseXOffset = 0x%X", Mod::output_prefix, BaseXOffset);
+    ConsoleWriteDebug("--Cheats::start: BaseXOffset = 0x%X", BaseXOffset);
 
     // Initialise BaseBOffset
     BaseBOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 45 33 ED 48 8B F1 48 85 C0");
-    ConsoleWriteDebug("%s --Cheats::start: BaseBOffset = 0x%X", Mod::output_prefix, BaseBOffset);
+    ConsoleWriteDebug("--Cheats::start: BaseBOffset = 0x%X", BaseBOffset);
 
     // Initialise BasePOffset
-    //BasePOffset = (uint64_t)sp::mem::aob_scan("4C 8B 05 ?? ?? ?? ?? 48 63 C9 48 8D 04 C9");
-    //ConsoleWriteDebug("%s --Cheats::start: 1st Attempt BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-    //if (BasePOffset == 0x00) {
-        BasePOffset = 0x141D1B360;
-        ConsoleWriteDebug("%s --Cheats::start: BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-        // = CheatsASMFollow(BasePOffset);
-    //}  else {
-    //    ConsoleWriteDebug("%s --Cheats::start: (1st Attempt) BasePOffset = 0x%X", Mod::output_prefix, BasePOffset);
-    //}
+    BasePOffset = 0x141D1B360;
+    ConsoleWriteDebug("--Cheats::start: BasePOffset = 0x%X", BasePOffset);
     
     // Initialise Homeward
     Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
-    ConsoleWriteDebug("%s --Cheats::start: Homeward    = 0x%X", Mod::output_prefix, Homeward);
+    ConsoleWriteDebug("--Cheats::start: Homeward    = 0x%X", Homeward);
 
     // Runs until a character is loaded, then updates a couple of pointers and never runs again
     MainLoop::setup_mainloop_callback(delayedVariableUpdateWrapper, NULL, "delayedVariableUpdate");
@@ -115,7 +122,16 @@ void Cheats::start() {
     // Runs continiously and calls other functions when a character is loaded
     MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
 
-    ConsoleWriteDebug("%s -Cheats::start: completed\n", Mod::output_prefix);
+    // Runs continiously monitoring curHP and activating speedhack when player is dead
+    // TODO: fix crashing
+    // I think it's because curHP results in a nullptr during the loading screen after death
+    // Need to hold off running code until the character is back loaded.
+    //MainLoop::setup_mainloop_callback(speedhackOnDeath, NULL, "speedhackOnDeath");
+
+    // Print configuration preferences
+    printPreferences();
+
+    ConsoleWriteDebug("-Cheats::start: completed\n");
 }
 
 bool Cheats::applyCheats() {
@@ -138,7 +154,7 @@ bool Cheats::applyCheats() {
 void RedEyeOrb() {
 
     // ID = 102; Offset = 0xDA8;
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -146,23 +162,23 @@ void RedEyeOrb() {
     RedEyeOrb = CheatsASMFollow(RedEyeOrb + 0x38);
     RedEyeOrb = RedEyeOrb + 0xDA8;
 
-    ConsoleWriteDebug("%s -RedEyeOrb = 0x%X", Mod::output_prefix, RedEyeOrb);
+    ConsoleWriteDebug("-RedEyeOrb = 0x%X", RedEyeOrb);
 
-    ConsoleWriteDebug("%s --RedEyeOrb: unrestrict_patch     = 0x%X", Mod::output_prefix, RedEyeOrb + 0x42);
-    ConsoleWriteDebug("%s --RedEyeOrb: modify_use_animation = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3E);
-    ConsoleWriteDebug("%s --RedEyeOrb: opmeMenuType_patch   = 0x%X", Mod::output_prefix, RedEyeOrb + 0x3F);
+    ConsoleWriteDebug("--RedEyeOrb: unrestrict_patch     = 0x%X", RedEyeOrb + 0x42);
+    ConsoleWriteDebug("--RedEyeOrb: modify_use_animation = 0x%X", RedEyeOrb + 0x3E);
+    ConsoleWriteDebug("--RedEyeOrb: opmeMenuType_patch   = 0x%X", RedEyeOrb + 0x3F);
 
     memcpy((void*)(RedEyeOrb + 0x42), unrestrict_patch, 3);
     memcpy((void*)(RedEyeOrb + 0x3E), modify_use_animation, 1);
     memcpy((void*)(RedEyeOrb + 0x3F), opmeMenuType_patch, 1);   // Could be combined with the "modify_use_animation" patch
-    ConsoleWriteDebug("%s --RedEyeOrb: no menu, no restrictions, different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -RedEyeOrb: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--RedEyeOrb: no menu, no restrictions, different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-RedEyeOrb: completed\n", Mod::output_prefix);
 }
 
 void EyeOfDeath() {
 
     // ID = 109; Offset = F18
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -170,17 +186,17 @@ void EyeOfDeath() {
     EyeOfDeath = CheatsASMFollow(EyeOfDeath + 0x38);
     EyeOfDeath = EyeOfDeath + 0xF18;
 
-    ConsoleWriteDebug("%s -EyeOfDeath = 0x%X", Mod::output_prefix, EyeOfDeath);
+    ConsoleWriteDebug("-EyeOfDeath = 0x%X", EyeOfDeath);
 
-    ConsoleWriteDebug("%s --EyeOfDeath: unrestrict_patch     = 0x%X", Mod::output_prefix, EyeOfDeath + 0x42);
-    ConsoleWriteDebug("%s --EyeOfDeath: modify_use_animation = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3E);
-    ConsoleWriteDebug("%s --EyeOfDeath: opmeMenuType_patch   = 0x%X", Mod::output_prefix, EyeOfDeath + 0x3F);
+    ConsoleWriteDebug("--EyeOfDeath: unrestrict_patch     = 0x%X", EyeOfDeath + 0x42);
+    ConsoleWriteDebug("--EyeOfDeath: modify_use_animation = 0x%X", EyeOfDeath + 0x3E);
+    ConsoleWriteDebug("--EyeOfDeath: opmeMenuType_patch   = 0x%X", EyeOfDeath + 0x3F);
 
     memcpy((void*)(EyeOfDeath + 0x42), unrestrict_patch, 3);
     memcpy((void*)(EyeOfDeath + 0x3E), modify_use_animation, 1);
     memcpy((void*)(EyeOfDeath + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --EyeOfDeath: no menu, no restrictions, different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -EyeOfDeath: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--EyeOfDeath: no menu, no restrictions, different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-EyeOfDeath: completed\n", Mod::output_prefix);
 }
 
 void GreenBlossom() {
@@ -194,62 +210,62 @@ void GreenBlossom() {
     GreenBlossom = CheatsASMFollow(GreenBlossom + 0x38);
     GreenBlossom = GreenBlossom + 0x1EE8;
 
-    ConsoleWriteDebug("%s -GreenBlossom = 0x%X", Mod::output_prefix, GreenBlossom);
+    ConsoleWriteDebug("-GreenBlossom = 0x%X", GreenBlossom);
 
-    ConsoleWriteDebug("%s --GreenBlossom: unrestrict_use_limit = 0x%X", Mod::output_prefix, GreenBlossom + 0x3B);
+    ConsoleWriteDebug("--GreenBlossom: unrestrict_use_limit = 0x%X", GreenBlossom + 0x3B);
 
     memcpy((void*)(GreenBlossom + 0x3B), unrestrict_use_limit, 1);
-    ConsoleWriteDebug("%s --GreenBlossom: no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -GreenBlossom: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--GreenBlossom: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-GreenBlossom: completed\n", Mod::output_prefix);
 }
 
 void RedSignSoapstone() {
 
     //ID = 101; Offset = D4C
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
 
     uint64_t RedSignSoapstone = CheatsASMFollow(BaseP + 0xF0);
     RedSignSoapstone = CheatsASMFollow(RedSignSoapstone + 0x38);
     RedSignSoapstone = RedSignSoapstone + 0xD4C;
 
-    ConsoleWriteDebug("%s -RedSignSoapstone = 0x%X", Mod::output_prefix, RedSignSoapstone);
+    ConsoleWriteDebug("-RedSignSoapstone = 0x%X", RedSignSoapstone);
 
-    ConsoleWriteDebug("%s --RedSignSoapstone: unrestrict_patch = 0x%X", Mod::output_prefix, RedSignSoapstone + 0x42);
+    ConsoleWriteDebug("--RedSignSoapstone: unrestrict_patch = 0x%X", RedSignSoapstone + 0x42);
 
     memcpy((void*)(RedSignSoapstone + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --RedSignSoapstone: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("--RedSignSoapstone: no restrictions\n", Mod::output_prefix);
 }
 
 void CrackedRedEyeOrb() {
 
     // ID = 111; Offset = F74
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
     byte opmeMenuType_patch[1] = { 0x00 };
     /* first two bytes are "vowType"s
-    bit                  0x63   0xC3    0xBF
-    0 = enable_live        1      1       1
-    1 = enable_grey        1      1       1
-    2 = enable_white       0      0       1
-    3 = enable_black       0      0       1
-    4 = enable_multi       0      0       1
-    5 = disable_offline    1      0       1
-    6 = isEquip            1      1       0
-    7 = isConsume          0      1       1
+    bit                  0x63   0xC3    0xBF    0xC4
+    0 = enable_live        1      1       1       1
+    1 = enable_grey        1      1       1       1
+    2 = enable_white       0      0       1       0
+    3 = enable_black       0      0       1       0
+    4 = enable_multi       0      0       1       0
+    5 = disable_offline    1      0       1       1
+    6 = isEquip            1      1       0       0
+    7 = isConsume          0      1       1       0
     */
 
     uint64_t CrackedRedEyeOrb = CheatsASMFollow(BaseP + 0xF0);
     CrackedRedEyeOrb = CheatsASMFollow(CrackedRedEyeOrb + 0x38);
     CrackedRedEyeOrb = CrackedRedEyeOrb + 0xF74;
 
-    ConsoleWriteDebug("%s -CrackedRedEyeOrb = 0x%X", Mod::output_prefix, CrackedRedEyeOrb);
+    ConsoleWriteDebug("-CrackedRedEyeOrb = 0x%X", CrackedRedEyeOrb);
 
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: unrestrict_patch     = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x42);
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: opmeMenuType_patch   = 0x%X", Mod::output_prefix, CrackedRedEyeOrb + 0x3F);
+    ConsoleWriteDebug("--CrackedRedEyeOrb: unrestrict_patch     = 0x%X", CrackedRedEyeOrb + 0x42);
+    ConsoleWriteDebug("--CrackedRedEyeOrb: opmeMenuType_patch   = 0x%X", CrackedRedEyeOrb + 0x3F);
 
     memcpy((void*)(CrackedRedEyeOrb + 0x42), unrestrict_patch, 3);
     memcpy((void*)(CrackedRedEyeOrb + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --CrackedRedEyeOrb: no menu, no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -CrackedRedEyeOrb: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--CrackedRedEyeOrb: no menu, no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-CrackedRedEyeOrb: completed\n", Mod::output_prefix);
 }
 
 void Humanity() {
@@ -261,13 +277,13 @@ void Humanity() {
     Humanity = CheatsASMFollow(Humanity + 0x38);
     Humanity = Humanity + 0x313C;
 
-    ConsoleWriteDebug("%s -Humanity = 0x%X", Mod::output_prefix, Humanity);
+    ConsoleWriteDebug("-Humanity = 0x%X", Humanity);
 
-    ConsoleWriteDebug("%s --Humanity: unrestrict_patch = 0x%X", Mod::output_prefix, Humanity + 0x42);
+    ConsoleWriteDebug("--Humanity: unrestrict_patch = 0x%X", Humanity + 0x42);
 
     memcpy((void*)(Humanity + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --Humanity: no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -Humanity: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--Humanity: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-Humanity: completed\n", Mod::output_prefix);
 }
 
 void TwinHumanity() {
@@ -279,14 +295,14 @@ void TwinHumanity() {
     TwinHumanity = CheatsASMFollow(TwinHumanity + 0x38);
     TwinHumanity = TwinHumanity + 0x3198;
 
-    ConsoleWriteDebug("%s -TwinHumanity = 0x%X", Mod::output_prefix, TwinHumanity);
+    ConsoleWriteDebug("-TwinHumanity = 0x%X", TwinHumanity);
 
-    ConsoleWriteDebug("%s --TwinHumanity: unrestrict_patch = 0x%X", Mod::output_prefix, TwinHumanity + 0x42);
+    ConsoleWriteDebug("--TwinHumanity: unrestrict_patch = 0x%X", TwinHumanity + 0x42);
 
     memcpy((void*)(TwinHumanity + 0x42), unrestrict_patch, 3);
 
-    ConsoleWriteDebug("%s --TwinHumanity: no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -TwinHumanity: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--TwinHumanity: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-TwinHumanity: completed\n", Mod::output_prefix);
 }
 
 void DivineBlessing() {
@@ -298,13 +314,13 @@ void DivineBlessing() {
     DivineBlessing = CheatsASMFollow(DivineBlessing + 0x38);
     DivineBlessing = DivineBlessing + 0x1E8C;
 
-    ConsoleWriteDebug("%s -DivineBlessing = 0x%X", Mod::output_prefix, DivineBlessing);
+    ConsoleWriteDebug("-DivineBlessing = 0x%X", DivineBlessing);
 
-    ConsoleWriteDebug("%s --DivineBlessing: unrestrict_patch = 0x%X", Mod::output_prefix, DivineBlessing + 0x42);
+    ConsoleWriteDebug("--DivineBlessing: unrestrict_patch = 0x%X", DivineBlessing + 0x42);
 
     memcpy((void*)(DivineBlessing + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --DivineBlessing: no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -DivineBlessing: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--DivineBlessing: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-DivineBlessing: completed\n", Mod::output_prefix);
 }
 
 void ElizabethMushroom() {
@@ -316,13 +332,13 @@ void ElizabethMushroom() {
     ElizabethMushroom = CheatsASMFollow(ElizabethMushroom + 0x38);
     ElizabethMushroom = ElizabethMushroom + 0x1E30;
 
-    ConsoleWriteDebug("%s -ElizabethMushroom = 0x%X", Mod::output_prefix, ElizabethMushroom);
+    ConsoleWriteDebug("-ElizabethMushroom = 0x%X", ElizabethMushroom);
 
-    ConsoleWriteDebug("%s --ElizabethMushroom: unrestrict_patch = 0x%X", Mod::output_prefix, ElizabethMushroom + 0x42);
+    ConsoleWriteDebug("--ElizabethMushroom: unrestrict_patch = 0x%X", ElizabethMushroom + 0x42);
 
     memcpy((void*)(ElizabethMushroom + 0x42), unrestrict_patch, 3);
-    ConsoleWriteDebug("%s --ElizabethMushroom: no restrictions", Mod::output_prefix);
-    ConsoleWriteDebug("%s -ElizabethMushroom: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--ElizabethMushroom: no restrictions", Mod::output_prefix);
+    ConsoleWriteDebug("-ElizabethMushroom: completed\n", Mod::output_prefix);
 }
 
 void HomewardBone() {
@@ -336,17 +352,17 @@ void HomewardBone() {
     HomewardBone = CheatsASMFollow(HomewardBone + 0x38);
     HomewardBone = HomewardBone + 0x2560;
 
-    ConsoleWriteDebug("%s -HomewardBone = 0x%X", Mod::output_prefix, HomewardBone);
+    ConsoleWriteDebug("-HomewardBone = 0x%X", HomewardBone);
 
-    ConsoleWriteDebug("%s --HomewardBone: unrestrict_patch     = 0x%X", Mod::output_prefix, HomewardBone + 0x42);
-    ConsoleWriteDebug("%s --HomewardBone: modify_use_animation = 0x%X", Mod::output_prefix, HomewardBone + 0x3E);
-    ConsoleWriteDebug("%s --HomewardBone: opmeMenuType_patch   = 0x%X", Mod::output_prefix, HomewardBone + 0x3F);
+    ConsoleWriteDebug("--HomewardBone: unrestrict_patch     = 0x%X", HomewardBone + 0x42);
+    ConsoleWriteDebug("--HomewardBone: modify_use_animation = 0x%X", HomewardBone + 0x3E);
+    ConsoleWriteDebug("--HomewardBone: opmeMenuType_patch   = 0x%X", HomewardBone + 0x3F);
 
     memcpy((void*)(HomewardBone + 0x42), unrestrict_patch, 3);
     memcpy((void*)(HomewardBone + 0x3E), modify_use_animation, 1);
     memcpy((void*)(HomewardBone + 0x3F), opmeMenuType_patch, 1);
-    ConsoleWriteDebug("%s --HomewardBone: no menu, no restrictions, different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -HomewardBone: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--HomewardBone: no menu, no restrictions, different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-HomewardBone: completed\n", Mod::output_prefix);
 }
 
 void DriedFinger() {
@@ -358,15 +374,15 @@ void DriedFinger() {
     uint64_t DriedFinger = CheatsASMFollow(BaseP + 0xF0);
     DriedFinger = CheatsASMFollow(DriedFinger + 0x38);
     DriedFinger = DriedFinger + 0x2AC4;
-    ConsoleWriteDebug("%s -DriedFinger = 0x%X", Mod::output_prefix, DriedFinger);
+    ConsoleWriteDebug("-DriedFinger = 0x%X", DriedFinger);
 
-    ConsoleWriteDebug("%s --DriedFinger: modify_use_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x3E);
-    ConsoleWriteDebug("%s --DriedFinger: modify_sfx_animation = 0x%X", Mod::output_prefix, DriedFinger + 0x04);
+    ConsoleWriteDebug("--DriedFinger: modify_use_animation = 0x%X", DriedFinger + 0x3E);
+    ConsoleWriteDebug("--DriedFinger: modify_sfx_animation = 0x%X", DriedFinger + 0x04);
 
     memcpy((void*)(DriedFinger + 0x3E), modify_use_animation, 1);
     memcpy((void*)(DriedFinger + 0x04), modify_sfx_variation, 1);
-    ConsoleWriteDebug("%s --DriedFinger: different animation, different SFX", Mod::output_prefix);
-    ConsoleWriteDebug("%s -DriedFinger: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--DriedFinger: different animation, different SFX", Mod::output_prefix);
+    ConsoleWriteDebug("-DriedFinger: completed\n", Mod::output_prefix);
 }
 
 void CharcoalPineResin() {
@@ -377,13 +393,13 @@ void CharcoalPineResin() {
     uint64_t CharcoalPineResin = CheatsASMFollow(BaseP + 0xF0);
     CharcoalPineResin = CheatsASMFollow(CharcoalPineResin + 0x38);
     CharcoalPineResin = CharcoalPineResin + 0x23F0;
-    ConsoleWriteDebug("%s -CharcoalPineResin = 0x%X", Mod::output_prefix, CharcoalPineResin);
+    ConsoleWriteDebug("-CharcoalPineResin = 0x%X", CharcoalPineResin);
 
-    ConsoleWriteDebug("%s --CharcoalPineResin: modify_use_animation = 0x%X", Mod::output_prefix, CharcoalPineResin + 0x3E);
+    ConsoleWriteDebug("--CharcoalPineResin: modify_use_animation = 0x%X", CharcoalPineResin + 0x3E);
 
     memcpy((void*)(CharcoalPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --CharcoalPineResin: different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -CharcoalPineResin: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--CharcoalPineResin: different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-CharcoalPineResin: completed\n", Mod::output_prefix);
 
 }
 
@@ -395,13 +411,13 @@ void RottenPineResin() {
     uint64_t RottenPineResin = CheatsASMFollow(BaseP + 0xF0);
     RottenPineResin = CheatsASMFollow(RottenPineResin + 0x38);
     RottenPineResin = RottenPineResin + 0x2504;
-    ConsoleWriteDebug("%s -RottenPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
+    ConsoleWriteDebug("-RottenPineResin = 0x%X", RottenPineResin);
 
-    ConsoleWriteDebug("%s --RottenPineResin: modify_use_animation = 0x%X", Mod::output_prefix, RottenPineResin + 0x3E);
+    ConsoleWriteDebug("--RottenPineResin: modify_use_animation = 0x%X", RottenPineResin + 0x3E);
 
     memcpy((void*)(RottenPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --RottenPineResin: different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -RottenPineResin: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--RottenPineResin: different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-RottenPineResin: completed\n", Mod::output_prefix);
 }
 
 void GoldPineResin() {
@@ -412,19 +428,49 @@ void GoldPineResin() {
     uint64_t GoldPineResin = CheatsASMFollow(BaseP + 0xF0);
     GoldPineResin = CheatsASMFollow(GoldPineResin + 0x38);
     GoldPineResin = GoldPineResin + 0x244C;
-    ConsoleWriteDebug("%s -GoldPineResin = 0x%X", Mod::output_prefix, RottenPineResin);
+    ConsoleWriteDebug("-GoldPineResin = 0x%X", GoldPineResin);
 
-    ConsoleWriteDebug("%s --GoldPineResin: modify_use_animation = 0x%X", Mod::output_prefix, GoldPineResin + 0x3E);
+    ConsoleWriteDebug("--GoldPineResin: modify_use_animation = 0x%X", GoldPineResin + 0x3E);
 
     memcpy((void*)(GoldPineResin + 0x3E), modify_use_animation, 1);
-    ConsoleWriteDebug("%s --GoldPineResin: different animation", Mod::output_prefix);
-    ConsoleWriteDebug("%s -GoldPineResin: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("--GoldPineResin: different animation", Mod::output_prefix);
+    ConsoleWriteDebug("-GoldPineResin: completed\n", Mod::output_prefix);
 }
+
+void RepairPowder() {
+
+    // ID = 280; Offset = 2110
+    byte modify_use_animation[1] = { 0x00 };        // Default use animation (Green Blossom style)
+
+    uint64_t RepairPowder = CheatsASMFollow(BaseP + 0xF0);
+    RepairPowder = CheatsASMFollow(RepairPowder + 0x38);
+    RepairPowder = RepairPowder + 0x2110;
+    ConsoleWriteDebug("-RepairPowder = 0x%X", RepairPowder);
+
+    ConsoleWriteDebug("--RepairPowder: modify_use_animation = 0x%X", RepairPowder + 0x3E);
+
+    memcpy((void*)(RepairPowder + 0x3E), modify_use_animation, 1);
+    ConsoleWriteDebug("--RepairPowder: different animation");
+    ConsoleWriteDebug("-RepairPowder: completed\n");
+
+}
+
+void RingOfFavorAndProtection() {
+
+    return;
+    uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
+    ConsoleWriteDebug("-RingOfFavorAndProtection = 0x%X", RingOfFavorAndProtection);
+    bitset(RingOfFavorAndProtection + 0x3C, 1);
+    ConsoleWrite("--RingOfFavorAndProtection: doesn't break on unequip");
+    ConsoleWrite("-RingOfFavorAndProtection: completed\n");
+}
+
+// Ring of Favor and Protection
 
 // noGoodsConsume
 void noGoodsConsumeToggle() {
     Cheats::noGoodsConsume.enabled = !Cheats::noGoodsConsume.enabled;
-    ConsoleWrite("%s Cheats: noGoodsConsume = %s", Mod::output_prefix, noGoodsConsumeSet(Cheats::noGoodsConsume.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noGoodsConsume = %s", noGoodsConsumeSet(Cheats::noGoodsConsume.enabled) ? "Active" : "Inactive");
 }
 void noGoodsConsumeApply() {
     if (BaseX) {
@@ -436,7 +482,6 @@ int noGoodsConsumeSet(bool state) {
     if (BaseX) {
         uint64_t noGoodsConsume = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x527;
         bitmod(noGoodsConsume, 0, state);
-        //ConsoleWrite("%s noGoodsConsume = %s", Mod::output_prefix, bitTest(noGoodsConsume, 0) ? "On" : "Off");
         return bitTest(noGoodsConsume, 0);
     }
     return -1;
@@ -445,7 +490,7 @@ int noGoodsConsumeSet(bool state) {
 // noArrowConsume
 void noArrowConsumeToggle() {
     Cheats::noArrowConsume.enabled = !Cheats::noArrowConsume.enabled;
-    ConsoleWrite("%s Cheats: noArrowConsume = %s", Mod::output_prefix, noArrowConsumeSet(Cheats::noArrowConsume.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noArrowConsume = %s", noArrowConsumeSet(Cheats::noArrowConsume.enabled) ? "Active" : "Inactive");
 }
 void noArrowConsumeApply() {
     if (debug_flags) {
@@ -457,7 +502,6 @@ int noArrowConsumeSet(bool state) {
     if (debug_flags) {
         uint64_t noArrowConsume = debug_flags + 0x04;
         *((byte*)noArrowConsume) = state;
-        //ConsoleWrite("%s noArrowConsume = %s", Mod::output_prefix, bitTest(noArrowConsume, 0) ? "On" : "Off");
         return bitTest(noArrowConsume, 0);
     }
     return -1;
@@ -466,7 +510,7 @@ int noArrowConsumeSet(bool state) {
 // noMagicConsume
 void noMagicConsumeToggle() {
     Cheats::noMagicConsume.enabled = !Cheats::noMagicConsume.enabled;
-    ConsoleWrite("%s Cheats: noMagicConsume = %s", Mod::output_prefix, noMagicConsumeSet(Cheats::noMagicConsume.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noMagicConsume = %s", noMagicConsumeSet(Cheats::noMagicConsume.enabled) ? "Active" : "Inactive");
 }
 void noMagicConsumeApply() {
     if (debug_flags) {
@@ -478,7 +522,6 @@ int noMagicConsumeSet(bool state) {
     if (debug_flags) {
         uint64_t noMagicConsume = debug_flags + 0x05;
         *((byte*)noMagicConsume) = state;
-        //ConsoleWrite("%s noMagicConsume = %s", Mod::output_prefix, bitTest(noMagicConsume, 0) ? "On" : "Off");
         return bitTest(noMagicConsume, 0);
     }
     return -1;
@@ -487,7 +530,7 @@ int noMagicConsumeSet(bool state) {
 // noDead
 void noDeadToggle() {
     Cheats::noDead.enabled = !Cheats::noDead.enabled;
-    ConsoleWrite("%s Cheats: noDead = %s", Mod::output_prefix, noDeadSet(Cheats::noDead.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noDead = %s", noDeadSet(Cheats::noDead.enabled) ? "Active" : "Inactive");
 }
 void noDeadApply() {
     if (debug_flags) {
@@ -499,7 +542,6 @@ int noDeadSet(bool state) {
     if (debug_flags) {
         uint64_t noDead = debug_flags + 0x00;
         *((byte*)noDead) = state;
-        //ConsoleWrite("%s noDead = %s", Mod::output_prefix, bitTest(noDead, 0) ? "On" : "Off");
         return bitTest(noDead, 0);
     }
     return -1;
@@ -508,7 +550,7 @@ int noDeadSet(bool state) {
 // eventSuperArmor
 void eventSuperArmorToggle() {
     Cheats::eventSuperArmor.enabled = !Cheats::eventSuperArmor.enabled;
-    ConsoleWrite("%s Cheats: eventSuperArmor = %s", Mod::output_prefix, eventSuperArmorSet(Cheats::eventSuperArmor.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: eventSuperArmor = %s", eventSuperArmorSet(Cheats::eventSuperArmor.enabled) ? "Active" : "Inactive");
 }
 void eventSuperArmorApply() {
     if (BaseX) {
@@ -520,7 +562,6 @@ int eventSuperArmorSet(bool state) {
     if (BaseX) {
         uint64_t eventSuperArmor = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x2A6;
         bitmod(eventSuperArmor, 0, Cheats::eventSuperArmor.enabled);
-        //ConsoleWrite("%s eventSuperArmor = %s", Mod::output_prefix, bitTest(eventSuperArmor, 0) ? "On" : "Off");
         return bitTest(eventSuperArmor, 0);
     }
     return -1;
@@ -529,7 +570,7 @@ int eventSuperArmorSet(bool state) {
 // noUpdateAI
 void noUpdateAIToggle() {
     Cheats::noUpdateAI.enabled = !Cheats::noUpdateAI.enabled;
-    ConsoleWrite("%s Cheats: noUpdateAI = %s", Mod::output_prefix, noUpdateAISet(Cheats::noUpdateAI.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noUpdateAI = %s", noUpdateAISet(Cheats::noUpdateAI.enabled) ? "Active" : "Inactive");
 }
 void noUpdateAIApply() {
     if (debug_flags) {
@@ -541,7 +582,6 @@ int noUpdateAISet(bool state) {
     if (debug_flags) {
         uint64_t noUpdateAI = debug_flags + 0x0D;
         *((byte*)noUpdateAI) = state;
-        //ConsoleWrite("%s noUpdateAI = %s", Mod::output_prefix, bitTest(noUpdateAI, 0) ? "On" : "Off");
         return bitTest(noUpdateAI, 0);
     }
     return -1;
@@ -550,7 +590,7 @@ int noUpdateAISet(bool state) {
 // noGravity
 void noGravityToggle() {
     Cheats::noGravity.enabled = !Cheats::noGravity.enabled;
-    ConsoleWrite("%s Cheats: noGravity = %s", Mod::output_prefix, noGravitySet(Cheats::noGravity.enabled) ? "Active" : "Inactive");
+    ConsoleWriteDebug("Cheats: noGravity = %s", noGravitySet(Cheats::noGravity.enabled) ? "Active" : "Inactive");
 }
 void noGravityApply() {
     if (BaseX) {
@@ -562,7 +602,6 @@ int noGravitySet(bool state) {
     if (BaseX) {
         uint64_t noGravity = CheatsASMFollow(BaseX + 0x68) + 0x2A5;
         bitmod(noGravity, 6, state);
-        //ConsoleWrite("%s noGravity = %s", Mod::output_prefix, bitTest(noGravity, 6) ? "On" : "Off");
         return bitTest(noGravity, 6);
     }
     return -1;
@@ -571,7 +610,7 @@ int noGravitySet(bool state) {
 // noHUD
 void noHUDToggle() {
     Cheats::noHUD.enabled = !Cheats::noHUD.enabled;
-    ConsoleWrite("%s Cheats: noHUD = %s", Mod::output_prefix, noHUDSet(Cheats::noHUD.enabled) ? "Inactive" : "Active");
+    ConsoleWriteDebug("Cheats: noHUD = %s",noHUDSet(Cheats::noHUD.enabled) ? "Inactive" : "Active");
 }
 void noHUDApply() {
     if (BaseB) {
@@ -583,7 +622,6 @@ int noHUDSet(bool state) {
     if (BaseB) {
         uint64_t noHUD = CheatsASMFollow((uint64_t)BaseB + 0x58) + 0x11;
         *((byte*)noHUD) = state;
-        //ConsoleWrite("%s noHUD = %s", Mod::output_prefix, bitTest(noHUD, 0) ? "On" : "Off");
         return bitTest(noHUD, 0);
     }
     return -1;
@@ -592,14 +630,49 @@ int noHUDSet(bool state) {
 // No Collision
 // Fly mode
 
+bool speedhackOnDeath(void* unused) {
+
+
+    if (BaseX && Game::playerchar_is_loaded()) {
+
+        sp::mem::pointer tmp;
+        tmp.set_base((void*)((uint64_t)BaseX + 0x68));
+        uint64_t curHP = (uint64_t)tmp.resolve();
+
+        if (*(uint32_t*)curHP == 0x00) {
+            if (speedhackActivated == false) {
+
+                ConsoleWriteDebug("-speedhackOnDeath: entered");
+                ConsoleWriteDebug("--speedHackOnDeath: curHP = %d", *(uint32_t*)curHP);
+                ConsoleWriteDebug("--speedHackOnDeath: curHP = 0x%X", curHP);
+
+                uint64_t ptr = CheatsASMFollow(BaseX + 0x68);
+                ConsoleWriteDebug("--speedHackOnDeath: ptr0 = 0x%X", ptr);
+
+                ptr = CheatsASMFollow(ptr + 0x68);
+                ConsoleWriteDebug("--speedHackOnDeath: ptr1 = 0x%X", ptr);
+
+                uint64_t speedModifier = CheatsASMFollow(ptr + 0x18) + 0xA8;
+                ConsoleWriteDebug("--speedHackOnDeath: speedModifier = 0x%X", speedModifier);
+
+                *(float*)speedModifier = 5.0f;
+                speedhackActivated = true;
+            }
+        } else {
+            speedhackActivated = false;
+        }
+    }
+    return true;
+}
+
 void reviveChar() {
-    ConsoleWrite("%s -reviveChar", Mod::output_prefix);
+    ConsoleWriteDebug("%s -reviveChar: entered", Mod::output_prefix);
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMReviveCharWrapper, 0, 0, 0);
 }
 
 void hollowChar() {
 
-    ConsoleWrite("%s -hollowChar", Mod::output_prefix);
+    ConsoleWriteDebug("%s -hollowChar: entered", Mod::output_prefix);
 
     byte CharType_hollow[1] = { 0x08 };
     byte TeamType_hollow[1] = { 0x04 };
@@ -622,7 +695,7 @@ void warp() {
 
     // TODO Check character is loaded here?
 
-    ConsoleWrite("%s -warp", Mod::output_prefix);
+    ConsoleWriteDebug("%s -warp: entered", Mod::output_prefix);
 
     struct SimpleClassHomewardWrapperArguments {
         uint64_t _BaseB;
@@ -638,7 +711,7 @@ void warp() {
 
 void kick(short player) {
 
-    ConsoleWrite("%s kick(%d)", Mod::output_prefix, player);
+    ConsoleWriteDebug("%s kick(%d): entered", Mod::output_prefix, player);
 
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMKickPlayerWrapper, &player, 0, 0 );
 }
@@ -674,8 +747,7 @@ void Cheats::teleport(COORDINATES coordinates) {
 
 void stopDurabilityDamage() {
 
-    ConsoleWriteDebug("%s -stopDurabilityDamage: entered", Mod::output_prefix);
-
+    ConsoleWriteDebug("-stopDurabilityDamage: entered");
     uint64_t InfDur1AOB = (uint64_t)sp::mem::aob_scan("45 89 4B 14 44 3B 51 20");
     //ConsoleWrite("%s InfDur1AOB = %X", Mod::output_prefix, InfDur1AOB);
 
@@ -724,7 +796,7 @@ void stopDurabilityDamage() {
    
     */
 
-    ConsoleWriteDebug("%s -stopDurabilityDamage: completed", Mod::output_prefix);
+    ConsoleWriteDebug("-stopDurabilityDamage: completed\n");
 }
 
 bool delayedVariableUpdateWrapper(void* unused) {
@@ -737,15 +809,15 @@ bool delayedVariableUpdateWrapper(void* unused) {
 
 void delayedVariableUpdate() {
 
-    ConsoleWriteDebug("%s -delayedVariableUpdate: entered", Mod::output_prefix);
+    ConsoleWriteDebug("-delayedVariableUpdate: entered");
 
     // Initialise debug_flagsOffset
     debug_flagsOffset = (uint64_t)sp::mem::aob_scan("4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 41 B1 01 4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B 8F 10 01 00 00 E8");
-    ConsoleWriteDebug("%s --delayedVariableUpdate: debug_flagsOffset = 0x%X", Mod::output_prefix, debug_flagsOffset);
+    ConsoleWriteDebug("--delayedVariableUpdate: debug_flagsOffset = 0x%X", debug_flagsOffset);
 
     // debug_flags
     debug_flags = (uint64_t)debug_flagsOffset + *(uint32_t*)((uint64_t)debug_flagsOffset + 3) + 7;
-    ConsoleWriteDebug("%s --delayedVariableUpdate: debug_flags = 0x%X", Mod::output_prefix, debug_flags);
+    ConsoleWriteDebug("--delayedVariableUpdate: debug_flags = 0x%X", debug_flags);
 
     // One-time initialisation
     P0 = Character::initialise(P0, PlayerBase, 0);
@@ -754,7 +826,7 @@ void delayedVariableUpdate() {
     P3 = Character::initialise(P0, PlayerBase, 3);
     P4 = Character::initialise(P0, PlayerBase, 4);
     P5 = Character::initialise(P0, PlayerBase, 5);
-    ConsoleWriteDebug("%s --delayedVariableUpdate: one-time Character initialisation completed", Mod::output_prefix, debug_flags);
+    ConsoleWriteDebug("--delayedVariableUpdate: one-time Character initialisation completed", debug_flags);
 
     if (Mod::enable_qol_cheats) {
 
@@ -777,38 +849,53 @@ void delayedVariableUpdate() {
         CharcoalPineResin();
         RottenPineResin();
         GoldPineResin();
+        RepairPowder();
         stopDurabilityDamage();
+        RingOfFavorAndProtection();
+        ConsoleWriteDebug("--delayedVariableUpdate: QoL cheats enabled");
     }
+
+    // Set IgnoreLeaveMessages according to configuration
+    if (Mod::disable_leave_messages) {
+        printBytes((uint64_t)GameMan_Ptr_bIgnoreLeaveMessages(), 1);
+        ConsoleWriteDebug("--delayedVariableUpdate: bIgnoreLeaveMessages = %s", GameMan_Set_bIgnoreLeaveMessages(0xFF) ? "true" : "false");
+        printBytes((uint64_t)GameMan_Ptr_bIgnoreLeaveMessages(), 1);
+    }
+
     variablesUpdated = true;
-    ConsoleWriteDebug("%s -delayedVariableUpdate: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("-delayedVariableUpdate: completed\n");
+
+    wchar_t dc_msg[300];
+    swprintf(dc_msg, 300, L"Delayed Variable Update Completed");
+    Game::show_popup_message(dc_msg);
 }
 
 void updateBase() {
 
-    ConsoleWriteDebug("%s -updateBase: entered", Mod::output_prefix);
+    ConsoleWriteDebug("-updateBase: entered");
     // TODO Confirm that the following pointers NEED updates after each reload
 
     // For information TODO: add remaining pointers from GameData.cpp
-    ConsoleWriteDebug("%s --updateBase: ds1_base   = 0x%X", Mod::output_prefix, Game::ds1_base);
+    ConsoleWriteDebug("--updateBase: ds1_base   = 0x%X", Game::ds1_base);
 
     // BaseX
     BaseX = CheatsASMFollow((uint64_t)BaseXOffset + *(uint32_t*)((uint64_t)BaseXOffset + 3) + 7);
-    ConsoleWriteDebug("%s --updateBase: BaseX      = 0x%X", Mod::output_prefix, BaseX);
+    ConsoleWriteDebug("--updateBase: BaseX      = 0x%X", BaseX);
 
     // BaseB
     BaseB = CheatsASMFollow((uint64_t)BaseBOffset + *(uint32_t*)((uint64_t)BaseBOffset + 3) + 7);
-    ConsoleWriteDebug("%s --updateBase: BaseB      = 0x%X", Mod::output_prefix, BaseB);
+    ConsoleWriteDebug("--updateBase: BaseB      = 0x%X", BaseB);
 
     // BaseP
     BaseP = CheatsASMFollow(BasePOffset);
-    ConsoleWriteDebug("%s --updateBase: BaseP      = 0x%X", Mod::output_prefix, BaseP);
+    ConsoleWriteDebug("--updateBase: BaseP      = 0x%X", BaseP);
 
     // PlayerBase
     PlayerBase = CheatsASMFollow(BaseX + 0x68);
     PlayerBase = CheatsASMFollow(PlayerBase + 0x18);
-    ConsoleWriteDebug("%s --updateBase: PlayerBase = 0x%X", Mod::output_prefix, PlayerBase);
+    ConsoleWriteDebug("--updateBase: PlayerBase = 0x%X", PlayerBase);
 
-    ConsoleWriteDebug("%s -updateBase: completed\n", Mod::output_prefix);
+    ConsoleWriteDebug("-updateBase: completed\n");
 }
 
 bool monitorCharacters(void* unused) {
@@ -818,13 +905,13 @@ bool monitorCharacters(void* unused) {
             if (prev_playerchar_is_loaded == false) {
                 if (variablesUpdated) {
 
-                    ConsoleWriteDebug("%s -monitorCharacters: entered", Mod::output_prefix);
+                    ConsoleWriteDebug("-monitorCharacters: entered");
 
                     updateBase();
-                    ConsoleWriteDebug("%s --monitorCharacters: returned from updateBase()", Mod::output_prefix);
+                    ConsoleWriteDebug("--monitorCharacters: returned from updateBase()");
 
                     Cheats::applyCheats();
-                    ConsoleWriteDebug("%s --monitorCharacters: returned from Cheats::applyCheats()", Mod::output_prefix);
+                    ConsoleWriteDebug("--monitorCharacters: returned from Cheats::applyCheats()");
 
                     P0.update(PlayerBase);
                     P1.update(PlayerBase);
@@ -832,12 +919,12 @@ bool monitorCharacters(void* unused) {
                     P3.update(PlayerBase);
                     P4.update(PlayerBase);
                     P5.update(PlayerBase);
-                    ConsoleWriteDebug("%s --monitorCharacters: returned from P[012345].update(PlayerBase)", Mod::output_prefix);
+                    ConsoleWriteDebug("--monitorCharacters: returned from P[012345].update(PlayerBase)");
 
                     //ConsoleWriteDebug("%s --monitorCharacters: Loaded '%ls'", Mod::output_prefix, P0.name());
 
                     prev_playerchar_is_loaded = true;
-                    ConsoleWriteDebug("%s -monitorCharacters: completed\n", Mod::output_prefix);
+                    ConsoleWriteDebug("-monitorCharacters: completed\n");
 
                 }
             }
@@ -871,6 +958,18 @@ void printByte(uint64_t pointer) {
 
 }
 
+void printByteRaw(uint64_t pointer) {
+    char buffer[1] = { 0x00 };
+    memcpy(buffer, (void*)pointer, 1);
+    ConsoleWriteNLF("%02u", buffer[0]);
+}
+
+byte returnByteRaw(uint64_t pointer) {
+    char buffer[1] = { 0x00 };
+    memcpy(buffer, (void*)pointer, 1);
+    return buffer[1];
+}
+
 inline bool bitTest(uint64_t pointer, short bit) {
     //return *((byte*)pointer) & (1 << bit) != 0;
     return _bittest64((const LONG64*)pointer, bit);
@@ -893,12 +992,64 @@ inline void bittog(uint64_t ptr, short bit) {
     *((byte*)ptr) ^= (1 << bit);
 }
 
+void printPosition() {
+
+    // Lookup XYZ positional floats
+    sp::mem::pointer X = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x120 });
+    sp::mem::pointer Z = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x124 });
+    sp::mem::pointer Y = sp::mem::pointer((void*)BaseX, { 0x68, 0x18, 0x28, 0x50, 0x20, 0x128 });
+
+    float* fX = (float*)X.resolve();
+    float* fZ = (float*)Z.resolve();
+    float* fY = (float*)Y.resolve();
+
+    // Print and check the addresses?
+
+    ConsoleWrite("X = %.1f", fX);
+    ConsoleWrite("Z = %.1f", fZ);
+    ConsoleWrite("Y = %.1f", fY);
+
+}
+
 void printPreferences() {
 
-    ConsoleWrite("%s DisableLowFpsDisconnect = %d", Mod::output_prefix, Mod::disable_low_fps_disconnect);
-    ConsoleWrite("%s UseSteamNames = %d", Mod::output_prefix, Mod::use_steam_names);
-    ConsoleWrite("%s FixHpBarSize = %d", Mod::output_prefix, Mod::fix_hp_bar_size);
-    ConsoleWrite("%s EnableQoLCheats = %d", Mod::output_prefix, Mod::enable_qol_cheats);
+    ConsoleWrite("DisableLowFpsDisconnect = %d", Mod::disable_low_fps_disconnect);
+    ConsoleWrite("UseSteamNames = %d", Mod::use_steam_names);
+    ConsoleWrite("FixHpBarSize = %d", Mod::fix_hp_bar_size);
+    ConsoleWrite("EnableQoLCheats = %d", Mod::enable_qol_cheats);
+    ConsoleWrite("VerboseMessages = %d", Mod::enable_verbose_messages);
+    ConsoleWrite("DisableLeaveMessages = %d\n", Mod::disable_leave_messages);
+
+}
+
+void Cheats::printMessage() {
+
+    // 9 rows max
+
+    char buf[1000];
+    wchar_t dc_msg[1000];
+    DWORD dwRead = 0;
+
+    ConsoleWrite(Mod::message_file_location);
+
+    HANDLE hFile = CreateFile(Mod::message_file_location, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        ConsoleWriteDebug("CreateFile error");
+        return;
+    }
+
+    if (!ReadFile(hFile, buf, 1000, &dwRead, NULL)) {
+        ConsoleWriteDebug("ReadFile error");
+        return;
+    }
+
+    CloseHandle(hFile);
+
+    for (int position = 0; position < dwRead; position++)
+        dc_msg[position] = (wchar_t)buf[position];
+  
+    //swprintf(dc_msg, 1000, L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ\niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\n3\n4\n5\n6\n7\n8\n9\n10\n");
+    Game::show_popup_message(dc_msg);
 
 }
 
@@ -906,17 +1057,47 @@ void Cheats::printPlayers() {
 
     if (BaseX && PlayerBase) {
 
+        ConsoleWrite("No. | SL  | Name             | VIT | ATN | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World");
         for (int p = 0; p < 6; p++) {
             uint64_t Player = CheatsASMFollow(PlayerBase + (p * 0x38));
             if (Player) {
-                ConsoleWrite("%s Player %d is %ls", Mod::output_prefix, p, (CheatsASMFollow(Player + 0x578) + 0xA8));
-                // Add phantom type?
-                // Time in world?
-                // Attributes?
-                // Character class?
+
+                // Desired Format
+                /*
+                No. | SL  | Name            | VIT | ATT | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World
+                01  | 125 | Mich            | 50  | 12  | 41  | 28  | 45  | 11  | 10  | 9   | Host         | 1034
+
+                Extras?
+                Steam Name
+                Steam Profile Link
+                Poise?
+                Rings?
+                Weapons?
+                Base Class?
+                Ping?
+                */
+                
+                float *Time_in_World = (float*)(CheatsASMFollow(Player + 0x30) + 0x20);
+
+                ConsoleWriteNLF(" %d  |", p);
+                ConsoleWriteNLF(" %3u |", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x90));   // SL
+                ConsoleWriteNLF(" %-16.16ls | ", CheatsASMFollow(Player + 0x578) + 0xA8);                          // Name
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x40));  // VIT
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x48));  // ATN
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x50));  // END
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x58));  // STR
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x60));  // DEX
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x88));  // RES
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x70));  // FTH
+                ConsoleWriteNLF("%-3.2u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x78));  // INT
+
+                ConsoleWriteNLF(" %u | ", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0xA4));   // SummonType
+                // Maybe a LUT or enum for this?
+                ConsoleWriteNLF(" %.0fs |\n", *(float*)(CheatsASMFollow(Player + 0x30) + 0x20));
+
             }
             else {
-                ConsoleWrite("%s Player %d is not populated", Mod::output_prefix, p);
+                //ConsoleWrite("%s Player %d is not populated", Mod::output_prefix, p);
             }
         }
     }
