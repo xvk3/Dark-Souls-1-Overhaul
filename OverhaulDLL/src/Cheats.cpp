@@ -157,7 +157,7 @@ bool Cheats::applyCheats() {
 void RedEyeOrb() {
 
     // ID = 102; Offset = 0xDA8;
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -181,7 +181,7 @@ void RedEyeOrb() {
 void EyeOfDeath() {
 
     // ID = 109; Offset = F18
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -225,7 +225,7 @@ void GreenBlossom() {
 void RedSignSoapstone() {
 
     //ID = 101; Offset = D4C
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
 
     uint64_t RedSignSoapstone = CheatsASMFollow(BaseP + 0xF0);
     RedSignSoapstone = CheatsASMFollow(RedSignSoapstone + 0x38);
@@ -242,8 +242,8 @@ void RedSignSoapstone() {
 void CrackedRedEyeOrb() {
 
     // ID = 111; Offset = F74
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xC4 };
-    byte opmeMenuType_patch[1] = { 0x00 };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
     /* first two bytes are "vowType"s
     bit                  0x63   0xC3    0xBF    0xC4
     0 = enable_live        1      1       1       1
@@ -274,7 +274,7 @@ void CrackedRedEyeOrb() {
 void Humanity() {
 
     // ID = 500; Offset = 313C
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };// Allow use with phantoms present
 
     uint64_t Humanity = CheatsASMFollow(BaseP + 0xF0);
     Humanity = CheatsASMFollow(Humanity + 0x38);
@@ -292,7 +292,7 @@ void Humanity() {
 void TwinHumanity() {
 
     // ID = 501; Offset = 3198
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };// Allow use with phantoms present
 
     uint64_t TwinHumanity = CheatsASMFollow(BaseP + 0xF0);
     TwinHumanity = CheatsASMFollow(TwinHumanity + 0x38);
@@ -311,7 +311,7 @@ void TwinHumanity() {
 void DivineBlessing() {
 
     // ID = 240; Offset = 1E8C
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };// Allow use with phantoms present
 
     uint64_t DivineBlessing = CheatsASMFollow(BaseP + 0xF0);
     DivineBlessing = CheatsASMFollow(DivineBlessing + 0x38);
@@ -329,7 +329,7 @@ void DivineBlessing() {
 void ElizabethMushroom() {
 
     // ID = 230; Offset = 1E30
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xbf };// Allow use with phantoms present
 
     uint64_t ElizabethMushroom = CheatsASMFollow(BaseP + 0xF0);
     ElizabethMushroom = CheatsASMFollow(ElizabethMushroom + 0x38);
@@ -478,6 +478,7 @@ void EstusFlask() {
 
 void EggVermifuge() {
 
+    return;
     // ID = 275; Offset = 20B4
     byte modify_use_animation[1] = { 0x01 };        // Resin animation
     byte modify_sfx_variation[1] = { 0x0A };        // Green Blossom SFX
@@ -508,7 +509,7 @@ void PerculiarDoll() {
 
     // ID = 384; Offset = 2A68
     // Does this have a 3D model?
-
+    // Could try throwing it like a Lloyd's Talisman
 }
 
 void RingOfFavorAndProtection() {
@@ -770,7 +771,7 @@ void warp() {
 
     // TODO Check character is loaded here?
 
-    ConsoleWriteDebug("%s -warp: entered", Mod::output_prefix);
+    ConsoleWriteDebug("-warp: entered\n");
 
     struct SimpleClassHomewardWrapperArguments {
         uint64_t _BaseB;
