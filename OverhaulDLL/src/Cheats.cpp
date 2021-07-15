@@ -6,9 +6,6 @@
 #include "SP/io/keybinds.h"
 #include "SP/memory/injection/asm/x64.h"
 
-#define KEY_TO_INDEX(k) ((k) / 10 - 3000)
-#define DECLARE_SPELL(k, v) [KEY_TO_INDEX(k)] = (v)
-
 // Helper functions
 extern "C" {
     uint64_t CheatsASMFollow(uint64_t pointer);
