@@ -110,6 +110,7 @@ void noHUDToggle();
 void noHUDApply();
 int noHUDSet(bool state);
 
+void replenishSpells();
 void reviveChar();
 void hollowChar();
 void warp();

@@ -28,6 +28,7 @@
 #define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
 #define _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_ "IgnoreLeaveMessages"
 #define _DS1_OVERHAUL_MESSAGE_FILE_LOCATION_ "MessageFileLocation"
+#define _DS1_OVERHAUL_HOTKEY_REPLENISH_SPELLS_ "ReplenishSpells"
 
 // Keybinds:
 #define _DS1_OVERHAUL_HOTKEY_TOGGLE_GOODS_CONSUME_ "ToggleGoodsConsume"
