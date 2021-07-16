@@ -43,9 +43,6 @@ bool Mod::fix_hp_bar_size = true;
 // If we use steam names or character names for players
 bool Mod::use_steam_names = false;
 
-// Enables stopDurabilityDamage function
-bool Mod::stop_durability_damage;
-
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
 
@@ -90,7 +87,6 @@ void Mod::get_init_preferences()
 
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
 
-    Mod::stop_durability_damage = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_STOP_DURABILITY_DAMAGE_, (int)Mod::stop_durability_damage, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
 }
 
 bool check_hotkeys(void* unused)
@@ -108,6 +104,7 @@ void Mod::get_user_keybinds()
     // Load keybinds here
     // Toggle mouse input keybind
     //get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_TOGGLE_MOUSE_INPUT_, kf_toggle_mouse_input);
+    get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_REPLENISH_SPELLS_, (int(*)())Game::replenishSpells);
 
     // Enable the keybinds check
     MainLoop::setup_mainloop_callback(check_hotkeys, NULL, "check_hotkeys");

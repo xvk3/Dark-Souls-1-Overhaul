@@ -247,7 +247,8 @@ public:
     
 	static bool playerchar_is_loaded();
 
-    static void stopDurabilityDamage(bool enable);
+    // Hotkey function for replenishing spell casts
+    static void replenishSpells();
 
 	static std::optional<uint32_t> get_player_char_max_hp();
 

@@ -24,7 +24,9 @@
 #define _DS1_OVERHAUL_PREF_DISABLE_LOW_FPS_DISCONNECT_ "DisableLowFpsDisconnect"
 #define _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_ "UseSteamNames"
 #define _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_ "FixHpBarSize"
-#define _DS1_OVERHAUL_PREF_STOP_DURABILITY_DAMAGE_ "StopDurabilityDamage"
+
+// Keybinds:
+#define _DS1_OVERHAUL_HOTKEY_REPLENISH_SPELLS_ "ReplenishSpells"
 
 #define _DS1_OVERHAUL_SETTINGS_STRING_BUFF_LEN_ 256  // Length of the string buffer used when obtaining user preference-related string data
 
