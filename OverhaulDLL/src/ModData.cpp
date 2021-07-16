@@ -49,12 +49,17 @@ bool Mod::enable_qol_cheats = false;
 // Enables verbose messages
 bool Mod::enable_verbose_messages = false;
 
+// Disables "Leave Messages"
+bool Mod::disable_leave_messages = false;
+
+// MessageFileLocation
+char Mod::message_file_location[MAX_PATH];
+
 // Custom game archive files to load instead of the vanilla game files
 std::wstring Mod::custom_game_archive_path;
 
 // Custom game configuration file to load instead of the vanilla file
 std::wstring Mod::custom_config_file_path;
-
 
 // Get user-defined startup preferences from the settings file
 void Mod::get_init_preferences()
@@ -93,6 +98,11 @@ void Mod::get_init_preferences()
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+    Mod::disable_leave_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_IGNORE_LEAVE_MESSAGES_, (int)Mod::disable_leave_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+    if (GetPrivateProfileString(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_MESSAGE_FILE_LOCATION_, Mod::message_file_location, Mod::message_file_location, MAX_PATH, _DS1_OVERHAUL_SETTINGS_FILE_) < 1) {
+        ConsoleWrite("ModData.cpp:GetPrivateProfileString error");
+    }
+
 }
 
 bool check_hotkeys(void* unused)
@@ -122,6 +132,8 @@ void Mod::get_user_keybinds()
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_HOLLOW_CHAR_, (int(*)())hollowChar);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_WARP_, (int(*)())warp);
     get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_PLAYERS_, (int(*)())Cheats::printPlayers);
+    get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_PRINT_MESSAGE_, (int(*)())Cheats::printMessage);
+    get_single_user_keybind(_DS1_OVERHAUL_HOTKEY_REPLENISH_SPELLS_, (int(*)())replenishSpells);
 
     // Enable the keybinds check
     MainLoop::setup_mainloop_callback(check_hotkeys, NULL, "check_hotkeys");
@@ -209,6 +221,7 @@ void Mod::get_custom_game_files()
     {
         ConsoleWrite("Found custom game config file definition: \"%s\"",custom_file_name_buff);
     }
+
 }
 
 // Change the legacy mode, and also reload the files that we modify now that we're using the original/new ones

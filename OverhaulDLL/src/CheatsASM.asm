@@ -3,9 +3,12 @@ _TEXT    SEGMENT
 extern stop_durability_damage_injection_return: qword
 extern stop_durability_damage_original_jump: qword
 
+extern GameMan_base_bIgnoreLeaveMessages: qword
 
 PUBLIC CheatsASMFollow
 PUBLIC stop_durability_damage_hook
+PUBLIC GameMan_Get_bIgnoreLeaveMessages
+PUBLIC GameMan_Set_bIgnoreLeaveMessages
 
 ; follows an address
 CheatsASMFollow PROC
@@ -69,6 +72,26 @@ stop_durability_damage_hook PROC
         jmp stop_durability_damage_original_jump    ; had to use a hopper & jmp as conditional jumps only support relative mode
 
 stop_durability_damage_hook ENDP
+
+GameMan_Ptr_bIgnoreLeaveMessages proc
+    mov rax, qword ptr[GameMan_base_bIgnoreLeaveMessages]
+    add rax, 0B93h
+    ret
+GameMan_Ptr_bIgnoreLeaveMessages endp
+
+GameMan_Get_bIgnoreLeaveMessages proc
+    mov rax, qword ptr[GameMan_base_bIgnoreLeaveMessages]
+    movzx eax, byte ptr[rax+0B93h]
+    ret
+GameMan_Get_bIgnoreLeaveMessages endp
+
+GameMan_Set_bIgnoreLeaveMessages proc
+    mov rax, qword ptr[GameMan_base_bIgnoreLeaveMessages]
+    or byte ptr[rax+0B93h], cl
+    movzx eax, byte ptr[rax+0B93h]
+    ret
+GameMan_Set_bIgnoreLeaveMessages endp
+
 
 _TEXT    ENDS
 

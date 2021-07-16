@@ -521,6 +521,7 @@ void AntiAntiCheat::start() {
 
     write_address = (uint8_t*)(AntiAntiCheat::finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_offset + Game::ds1_base);
     sp::mem::code::x64::inject_jmp_14b(write_address, &finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_return, 1, &finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection);
+
 }
 
 

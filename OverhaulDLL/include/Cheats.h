@@ -42,6 +42,7 @@ public:
     // Functions
     static bool applyCheats();
     static void printPlayers();
+    static void printMessage();
 
     // Cheats
     static CHEAT noGoodsConsume;    // ToggleGoodsConsume
@@ -69,6 +70,13 @@ void DriedFinger();
 void CharcoalPineResin();
 void RottenPineResin();
 void GoldPineResin();
+void RepairPowder();
+void EstusFlask();
+void EggVermifuge();
+void GoldCoin();
+void PerculiarDoll();
+void RingOfFavorAndProtection();
+void LoadingScreenItems();
 
 void noGoodsConsumeToggle();
 void noGoodsConsumeApply();
@@ -102,6 +110,7 @@ void noHUDToggle();
 void noHUDApply();
 int noHUDSet(bool state);
 
+void replenishSpells();
 void reviveChar();
 void hollowChar();
 void warp();
@@ -109,4 +118,4 @@ void stopDurabilityDamage();
 
 void updateBase();
 
-#endif
+#endif // _DS1_OVERHAUL_CHEATS_H_
