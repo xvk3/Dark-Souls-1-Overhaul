@@ -101,11 +101,13 @@ void Cheats::start() {
     ConsoleWriteDebug("--Cheats::start: ds1_base    = 0x%X", Game::ds1_base);
 
     // Initialise BaseXOffset
-    BaseXOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 48 39 48 68 0F 94 C0 C3");
+    //BaseXOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 48 39 48 68 0F 94 C0 C3");
+    BaseXOffset = Game::ds1_base + 0x3204E0;
     ConsoleWriteDebug("--Cheats::start: BaseXOffset = 0x%X", BaseXOffset);
 
     // Initialise BaseBOffset
-    BaseBOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 45 33 ED 48 8B F1 48 85 C0");
+    //BaseBOffset = (uint64_t)sp::mem::aob_scan("48 8B 05 ?? ?? ?? ?? 45 33 ED 48 8B F1 48 85 C0");
+    BaseBOffset = Game::ds1_base + 0x728E50;
     ConsoleWriteDebug("--Cheats::start: BaseBOffset = 0x%X", BaseBOffset);
 
     // Initialise BasePOffset
@@ -113,7 +115,8 @@ void Cheats::start() {
     ConsoleWriteDebug("--Cheats::start: BasePOffset = 0x%X", BasePOffset);
     
     // Initialise Homeward
-    Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
+    //Homeward = (uint64_t)sp::mem::aob_scan("48 89 5C 24 08 57 48 83 EC 20 48 8B D9 8B FA 48 8B 49 08 48 85 C9 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B 4B 08");
+    Homeward = Game::ds1_base + 0x485CE0;
     ConsoleWriteDebug("--Cheats::start: Homeward    = 0x%X", Homeward);
 
     // Change the loading screen items to all be Green Blossom
