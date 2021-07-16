@@ -1154,8 +1154,8 @@ void Cheats::teleport(COORDINATES coordinates) {
 void stopDurabilityDamage() {
 
     ConsoleWriteDebug("-stopDurabilityDamage: entered");
-    uint64_t InfDur1AOB = (uint64_t)sp::mem::aob_scan("45 89 4B 14 44 3B 51 20");
-    //ConsoleWrite("%s InfDur1AOB = %X", Mod::output_prefix, InfDur1AOB);
+
+    uint64_t InfDur1AOB = Game::ds1_base + 0x74bb07;
 
     // A conditional (and therefore relative) jump was overwritten by inject_jmp_14b. Calculate absolute address of the jump target
     // This allows the stop_durability_damage_hook procedure to correctly replicate the instructions overwritten by the trampoline
