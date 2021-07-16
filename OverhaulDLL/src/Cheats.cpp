@@ -1222,6 +1222,7 @@ void delayedVariableUpdate() {
 
     // Initialise debug_flagsOffset
     debug_flagsOffset = (uint64_t)sp::mem::aob_scan("4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 41 B1 01 4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B 8F 10 01 00 00 E8");
+    //debug_flagsOffset = Game::ds1_base + 0x374F7E;
     ConsoleWriteDebug("--delayedVariableUpdate: debug_flagsOffset = 0x%X", debug_flagsOffset);
 
     // debug_flags
@@ -1470,6 +1471,8 @@ void Cheats::printMessage() {
 void Cheats::printPlayers() {
 
     if (BaseX && PlayerBase) {
+
+        ConsoleWrite("Node count: %d", Game::get_node_count());
 
         ConsoleWrite("No. | SL  | Name             | VIT | ATN | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World");
         for (int p = 0; p < 6; p++) {
