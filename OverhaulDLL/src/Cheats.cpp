@@ -1472,7 +1472,7 @@ void Cheats::printPlayers() {
 
     if (BaseX && PlayerBase) {
 
-        ConsoleWrite("Node count: %d", Game::get_node_count());
+        //ConsoleWrite("Node count: %d", Game::get_node_count());
 
         ConsoleWrite("No. | SL  | Name             | VIT | ATN | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World");
         for (int p = 0; p < 6; p++) {
