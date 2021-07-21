@@ -24,6 +24,7 @@
 #define _DS1_OVERHAUL_PREF_DISABLE_LOW_FPS_DISCONNECT_ "DisableLowFpsDisconnect"
 #define _DS1_OVERHAUL_PREF_USE_STEAM_NAMES_ "UseSteamNames"
 #define _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_ "FixHpBarSize"
+#define _DS1_OVERHAUL_PREF_STOP_DURABILITY_DAMAGE_ "StopDurabilityDamage"
 #define _DS1_OVERHAUL_PREF_CHEATS_ "EnableQoLCheats"
 #define _DS1_OVERHAUL_VERBOSE_MESSAGES_ "VerboseMessages"
 // Keybinds:
@@ -92,6 +93,9 @@ public:
 
     // Enables verbose messages
     static bool enable_verbose_messages;
+
+    // Enables stopDurabilityDamage function
+    static bool stop_durability_damage;
 
     // Custom game archive files to load instead of the vanilla game files
     static std::wstring custom_game_archive_path;

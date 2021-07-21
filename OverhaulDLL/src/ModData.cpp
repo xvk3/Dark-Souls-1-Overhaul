@@ -37,11 +37,14 @@ bool Mod::legacy_mode = true;
 // Determines to disable the game's "Low framerate detected" disconnection
 bool Mod::disable_low_fps_disconnect = false;
 
+// If the user wants to use the default broken UI for the HP bar
+bool Mod::fix_hp_bar_size = true;
+
 // If we use steam names or character names for players
 bool Mod::use_steam_names = false;
 
-// If the user wants to use the default broken UI for the HP bar
-bool Mod::fix_hp_bar_size = true;
+// Enables stopDurabilityDamage function
+bool Mod::stop_durability_damage = true;
 
 // Enables default cheats
 bool Mod::enable_qol_cheats = false;
@@ -93,6 +96,7 @@ void Mod::get_init_preferences()
     Mod::fix_hp_bar_size = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_FIX_HP_BAR_SIZE_, (int)Mod::fix_hp_bar_size, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_qol_cheats = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_CHEATS_, (int)Mod::enable_qol_cheats, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
     Mod::enable_verbose_messages = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_VERBOSE_MESSAGES_, (int)Mod::enable_verbose_messages, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
+    Mod::stop_durability_damage = ((int)GetPrivateProfileInt(_DS1_OVERHAUL_PREFS_SECTION_, _DS1_OVERHAUL_PREF_STOP_DURABILITY_DAMAGE_, (int)Mod::stop_durability_damage, _DS1_OVERHAUL_SETTINGS_FILE_) != 0);
 }
 
 bool check_hotkeys(void* unused)

@@ -14,12 +14,12 @@ extern "C" {
     void     CheatsASMKickPlayerWrapper();
 }
 
-// Stop Durability Damage
+/*// Stop Durability Damage
 extern "C" {
     uint64_t stop_durability_damage_injection_return;
     uint64_t stop_durability_damage_original_jump;
     void stop_durability_damage_hook();
-}
+}*/
 
 void printBytes(uint64_t pointer, short rows_of_eight);
 void printByte(uint64_t pointer);
@@ -672,6 +672,7 @@ void Cheats::teleport(COORDINATES coordinates) {
     }
 }
 
+/*
 void stopDurabilityDamage() {
 
     ConsoleWriteDebug("%s -stopDurabilityDamage: entered", Mod::output_prefix);
@@ -722,10 +723,10 @@ void stopDurabilityDamage() {
     .text:000000014074BB20 48 8B 5C 24 08                             mov     rbx, [rsp+arg_0]
     .text:000000014074BB25 C3                                         retn
    
-    */
+    
 
     ConsoleWriteDebug("%s -stopDurabilityDamage: completed", Mod::output_prefix);
-}
+}*/
 
 bool delayedVariableUpdateWrapper(void* unused) {
     if (Game::playerchar_is_loaded() && variablesUpdated == false) {
@@ -777,7 +778,7 @@ void delayedVariableUpdate() {
         CharcoalPineResin();
         RottenPineResin();
         GoldPineResin();
-        stopDurabilityDamage();
+        //stopDurabilityDamage();
     }
     variablesUpdated = true;
     ConsoleWriteDebug("%s -delayedVariableUpdate: completed\n", Mod::output_prefix);

@@ -5,7 +5,7 @@ extern stop_durability_damage_original_jump: qword
 
 
 PUBLIC CheatsASMFollow
-PUBLIC stop_durability_damage_hook
+;PUBLIC stop_durability_damage_hook
 
 ; follows an address
 CheatsASMFollow PROC
@@ -51,6 +51,7 @@ CheatsASMKickPlayerWrapper PROC
 
 CheatsASMKickPlayerWrapper ENDP
 
+COMMENT @
 stop_durability_damage_hook PROC
 
     cmp dword ptr[r11+14h], r9d                     ; if the new durability value is NOT lower than the current value
@@ -69,6 +70,7 @@ stop_durability_damage_hook PROC
         jmp stop_durability_damage_original_jump    ; had to use a hopper & jmp as conditional jumps only support relative mode
 
 stop_durability_damage_hook ENDP
+@
 
 _TEXT    ENDS
 
