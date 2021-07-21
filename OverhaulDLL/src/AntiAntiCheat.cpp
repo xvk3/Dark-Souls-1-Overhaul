@@ -615,9 +615,9 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     memcpy(memberflags_orig, memberflags_ptr, sizeof(memberflags_orig));
 
     //unset all the bitflags, so we don't send any info to the server
-    memset((void*)input_data, 0xFF, 32);
+    memset((void*)input_data, 0x00, 32);
 
-    //allow only some mandatory data to be sent
+    //allow only some mandatory data to be sent - metal-crow's set
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MpRegion);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RankingRegistration);
@@ -631,6 +631,128 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_100);
+
+    // Mich's set (adds everything)
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);                   
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ClearCount);               // Number of times player has beaten the game
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::DeathCount);               // Number of deaths
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MultiplayerCount);         // Ought to be safe
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CoopSuccessCount);         // Ought to be safe
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_5);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_6);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_7);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulLevel);                // Ought to be safe (assuming non-cheated build)
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulCount);                // Ought to be safe
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulMemory);               // Total souls acquired
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Archetype);                // Starting class?
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::HP);                       // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxHp);                    // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxHp_1);              // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Mp);                       // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxMp);                    // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxHp_2);              // Should be safe in Legacy
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Vitality);                 // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Attunement);               // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Endurance);                // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Strength);                 // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Dexterity);                // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Resistance);               // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Intelligence);             // Just stats
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Force);                    // Probably should be "Faith"
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ItemDiscoveryRate);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackR1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackR2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackL1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackL2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxWeaponLevel);           // Probably necessary for online matchmaking
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EstusLevel);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RankingRegistration);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::PlayTime);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::HumanityCount);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Left_Hand_1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Left_Hand_2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Right_Hand_1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Right_Hand_2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorHeadInv);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorBodyInv);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorArmsInv);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorLegsInv);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::LeftHandHeldWeaponSlot);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RightHandHeldWeaponSlot);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Stamina);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxStamina);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxStamina);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot3);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot3);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RinginSlot0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RinginSlot1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar3);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar4);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot3);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell1);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell2);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell3);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell4);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell5);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell6);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell7);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell8);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell9);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell10);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell11);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell12);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionRoleID);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_81);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_82);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RegionMatchmaking);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHollow);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::PlayerSex);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_86);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_87);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_88);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_89);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_91);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Const0);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_93);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::defSAToughnessTotal);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxEquipLoad);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CharacterName);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_97);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_98);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_100);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MpRegion);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionNatType);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CovenantId);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::inSession);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_105);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::NormalDefenses);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::NormalResists);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CovenantLevel);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_109);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_110);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_111);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_112);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_113);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_114);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_115);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_116);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_117);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_118);
+
 }
 
 void finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper()

@@ -1293,22 +1293,40 @@ void updateBase() {
     ConsoleWriteDebug("--updateBase: ds1_base   = 0x%X", Game::ds1_base);
 
     // BaseX
-    BaseX = CheatsASMFollow((uint64_t)BaseXOffset + *(uint32_t*)((uint64_t)BaseXOffset + 3) + 7);
+    BaseX = *(uint64_t*)((uint64_t)BaseXOffset + *(uint32_t*)((uint64_t)BaseXOffset + 3) + 7);
     ConsoleWriteDebug("--updateBase: BaseX      = 0x%X", BaseX);
 
+    /*
+    // BaseX breakdown
+    uint64_t BaseX_0 = (uint64_t)BaseXOffset + 3;
+    ConsoleWriteDebug("--updateBase: BaseX breakdown: 0 = %X", BaseX_0);
+
+    uint64_t BaseX_1 = *(uint32_t*)(BaseX_0 + 7);
+    ConsoleWriteDebug("--updateBase: BaseX breakdown: 1 = %X", BaseX_1);
+
+    uint64_t BaseX_2 = (uint64_t)BaseXOffset + BaseX_1;
+    ConsoleWriteDebug("--updateBase: BaseX breakdown: 2 = %X", BaseX_2);
+
+    uint64_t BaseX_3 = *(uint64_t*)BaseX_2;
+    ConsoleWriteDebug("--updateBase: BaseX breakdown: 3 = %X", BaseX_3);
+    
+    // TODO: use sp::mem::pointer instead of CheatsASMFollow
+    //sp::mem::pointer BaseX_2 = sp::mem::pointer<int64_t>((void*)(BaseXOffset), { 0x03, 0x07 });
+    //sp::mem::pointer speed_ptr = sp::mem::pointer<float>((void*)Game::world_chr_man_imp, { 0x68, 0x68, 0x18, 0xA8 });
+    */
+
     // BaseB
-    BaseB = CheatsASMFollow((uint64_t)BaseBOffset + *(uint32_t*)((uint64_t)BaseBOffset + 3) + 7);
+    BaseB = *(uint64_t*)((uint64_t)BaseBOffset + *(uint32_t*)((uint64_t)BaseBOffset + 3) + 7);
     ConsoleWriteDebug("--updateBase: BaseB      = 0x%X", BaseB);
 
     // BaseP
-    BaseP = CheatsASMFollow(BasePOffset);
+    BaseP = *(uint64_t*)BasePOffset;
     ConsoleWriteDebug("--updateBase: BaseP      = 0x%X", BaseP);
 
     // PlayerBase
-    PlayerBase = CheatsASMFollow(BaseX + 0x68);
-    PlayerBase = CheatsASMFollow(PlayerBase + 0x18);
+    PlayerBase = *(uint64_t*)(*(uint64_t*)(BaseX + 0x68) + 0x18);
     ConsoleWriteDebug("--updateBase: PlayerBase = 0x%X", PlayerBase);
-
+    
     ConsoleWriteDebug("-updateBase: completed\n");
 }
 
