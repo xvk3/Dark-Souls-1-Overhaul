@@ -1387,7 +1387,6 @@ void printByte(uint64_t pointer) {
     char buffer[1] = { 0x00 };
     memcpy(buffer, (void*)pointer, 1);
     ConsoleWriteNLF("\n%p: %02hhx", pointer, (unsigned char)buffer[0]);
-
 }
 
 void printByteRaw(uint64_t pointer) {

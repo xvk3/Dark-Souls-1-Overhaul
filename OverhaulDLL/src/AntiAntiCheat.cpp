@@ -447,7 +447,7 @@ enum MemberFlags_IdentifiersEnum
     RegionMatchmaking = 0x53,
     isPlayerHollow = 0x54,
     PlayerSex = 0x55,
-    New_Name_86 = 0x56,
+    isPlayerHuman = 0x56,
     New_Name_87 = 0x57,
     New_Name_88 = 0x58,
     New_Name_89 = 0x59,
@@ -617,7 +617,7 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     //unset all the bitflags, so we don't send any info to the server
     memset((void*)input_data, 0x00, 32);
 
-    //allow only some mandatory data to be sent - metal-crow's set
+    //allow only some mandatory data to be sent
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MpRegion);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RankingRegistration);
@@ -631,8 +631,15 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_100);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulLevel);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHuman);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ClearCount);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxWeaponLevel);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_7);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_105);
 
-    // Mich's set (adds everything)
+    // Full set of MemberFlags
+    /*
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);                   
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ClearCount);               // Number of times player has beaten the game
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::DeathCount);               // Number of deaths
@@ -719,7 +726,7 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RegionMatchmaking);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHollow);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::PlayerSex);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_86);
+    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHuman);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_87);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_88);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_89);
@@ -752,6 +759,7 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_116);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_117);
     set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_118);
+    */
 
 }
 
