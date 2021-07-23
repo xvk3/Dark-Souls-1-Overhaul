@@ -10,6 +10,27 @@ PUBLIC stop_durability_damage_hook
 PUBLIC GameMan_Get_bIgnoreLeaveMessages
 PUBLIC GameMan_Set_bIgnoreLeaveMessages
 
+; TODO: finish this, add more antiantidebug methods
+; disable PEB->BeingDebugged
+Cheats_BeingDebugged PROC
+
+    ;typedef struct _PEB {
+    ;   BYTE                            Reserved1[2];
+    ;   BYTE                            BeingDebugged;
+
+    mov rax, qword ptr gs:[60h]         ; PEB
+    mov byte ptr[rax+02h], 00h          ; PEB->BeingDebugged
+    mov dword ptr[rax+0BCh], 00h        ; PEB->NtGlobalFlag
+
+    mov rcx, qword ptr[rax+30h]         ; PEB->ProcessHeap
+    and dword ptr[rcx+70h], 0FFFFFFFDh  ; ProcessHeap->Flags
+    mov dword ptr[rcx+74h], 00h         ; ProcessHeap->ForceFlags
+
+    ret
+
+Cheats_BeingDebugged ENDP
+
+
 ; follows an address
 CheatsASMFollow PROC
 
