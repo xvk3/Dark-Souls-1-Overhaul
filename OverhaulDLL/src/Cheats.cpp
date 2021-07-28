@@ -125,6 +125,7 @@ void Cheats::start() {
     // Runs until a character is loaded, then updates a couple of pointers and never runs again
     MainLoop::setup_mainloop_callback(delayedVariableUpdateWrapper, NULL, "delayedVariableUpdate");
 
+    // Moved to GameData.cpp:preload_function_caches()
     // Runs continiously and calls other functions when a character is loaded
     MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
 
@@ -133,6 +134,11 @@ void Cheats::start() {
     // I think it's because curHP results in a nullptr during the loading screen after death
     // Need to hold off running code until the character is back loaded.
     //MainLoop::setup_mainloop_callback(speedhackOnDeath, NULL, "speedhackOnDeath");
+
+    //MainLoop::setup_mainloop_callback((MainLoopCallback)Cheats::applyCheats, NULL, "applyCheats");
+
+    // TODO: how can I call applyCheats in a way that doesn't cause crashes?
+    // What part of applyCheats is causing crashes?
 
     // Print configuration preferences
     printPreferences();
@@ -552,9 +558,11 @@ void noGoodsConsumeToggle() {
     ConsoleWriteDebug("Cheats: noGoodsConsume = %s", noGoodsConsumeSet(Cheats::noGoodsConsume.enabled) ? "Active" : "Inactive");
 }
 void noGoodsConsumeApply() {
-    if (BaseX) {
-        uint64_t noGoodsConsume = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x527;
-        bitmod(noGoodsConsume, 0, Cheats::noGoodsConsume.enabled);
+    if (BaseX && *(uint64_t*)(BaseX + 0x68) != NULL) {
+        //uint64_t noGoodsConsume = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x527;
+        //uint64_t noGoodsConsume = *(uint64_t*)(BaseX + 0x68) + 0x527;
+        //bitmod(noGoodsConsume, 0, Cheats::noGoodsConsume.enabled);
+        bitmod(*(uint64_t*)(BaseX + 0x68) + 0x527, 0, Cheats::noGoodsConsume.enabled);
     }
 }
 int noGoodsConsumeSet(bool state) {
@@ -573,8 +581,8 @@ void noArrowConsumeToggle() {
 }
 void noArrowConsumeApply() {
     if (debug_flags) {
-        uint64_t noArrowConsume = debug_flags + 0x04;
-        *((byte*)noArrowConsume) = Cheats::noArrowConsume.enabled;
+        //uint64_t noArrowConsume = debug_flags + 0x04;
+        *((byte*)debug_flags + 0x04) = Cheats::noArrowConsume.enabled;
     }
 }
 int noArrowConsumeSet(bool state) {
@@ -593,8 +601,8 @@ void noMagicConsumeToggle() {
 }
 void noMagicConsumeApply() {
     if (debug_flags) {
-        uint64_t noMagicConsume = debug_flags + 0x05;
-        *((byte*)noMagicConsume) = Cheats::noMagicConsume.enabled;
+        //uint64_t noMagicConsume = debug_flags + 0x05;
+        *(byte*)(debug_flags + 0x05) = Cheats::noMagicConsume.enabled;
     }
 }
 int noMagicConsumeSet(bool state) {
@@ -613,8 +621,8 @@ void noDeadToggle() {
 }
 void noDeadApply() {
     if (debug_flags) {
-        uint64_t noDead = debug_flags + 0x00;
-        *((byte*)noDead) = Cheats::noDead.enabled;
+        //uint64_t noDead = debug_flags + 0x00;
+        *(byte*)(debug_flags + 0x00) = Cheats::noDead.enabled;
     }
 }
 int noDeadSet(bool state) {
@@ -632,9 +640,10 @@ void eventSuperArmorToggle() {
     ConsoleWriteDebug("Cheats: eventSuperArmor = %s", eventSuperArmorSet(Cheats::eventSuperArmor.enabled) ? "Active" : "Inactive");
 }
 void eventSuperArmorApply() {
-    if (BaseX) {
-        uint64_t eventSuperArmor = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x2A6;
-        bitmod(eventSuperArmor, 0, Cheats::eventSuperArmor.enabled);
+    if (BaseX && *(uint64_t*)(BaseX + 0x68) != NULL) {
+        //uint64_t eventSuperArmor = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x2A6;
+        //uint64_t eventSuperArmor = *(uint64_t*)(BaseX + 0x68) + 0x2A6;
+        bitmod(*(uint64_t*)(BaseX + 0x68) + 0x2A6, 0, Cheats::eventSuperArmor.enabled);
     }
 }
 int eventSuperArmorSet(bool state) {
@@ -653,8 +662,8 @@ void noUpdateAIToggle() {
 }
 void noUpdateAIApply() {
     if (debug_flags) {
-        uint64_t noUpdateAI = debug_flags + 0x0D;
-        *((byte*)noUpdateAI) = Cheats::noUpdateAI.enabled;
+        //uint64_t noUpdateAI = debug_flags + 0x0D;
+        *(byte*)(debug_flags + 0x0D) = Cheats::noUpdateAI.enabled;
     }
 }
 int noUpdateAISet(bool state) {
@@ -672,9 +681,10 @@ void noGravityToggle() {
     ConsoleWriteDebug("Cheats: noGravity = %s", noGravitySet(Cheats::noGravity.enabled) ? "Active" : "Inactive");
 }
 void noGravityApply() {
-    if (BaseX) {
-        uint64_t noGravity = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x2A5;
-        bitmod(noGravity, 0, Cheats::noGravity.enabled);
+    if (BaseX && *(uint64_t*)(BaseX + 0x68) != NULL) {
+        //uint64_t noGravity = CheatsASMFollow((uint64_t)BaseX + 0x68) + 0x2A5;
+        //uint64_t noGravity = *(uint64_t*)(BaseX + 0x68) + 0x2A5;
+        bitmod(*(uint64_t*)(BaseX + 0x68) + 0x2A5, 0, Cheats::noGravity.enabled);
     }
 }
 int noGravitySet(bool state) {
@@ -692,9 +702,10 @@ void noHUDToggle() {
     ConsoleWriteDebug("Cheats: noHUD = %s",noHUDSet(Cheats::noHUD.enabled) ? "Inactive" : "Active");
 }
 void noHUDApply() {
-    if (BaseB) {
-        uint64_t noHUD = CheatsASMFollow((uint64_t)BaseB + 0x58) + 0x11;
-        *((byte*)noHUD) = Cheats::noHUD.enabled;
+    if (BaseB && *(uint64_t*)(BaseB + 0x58) != NULL) {
+        //uint64_t noHUD = CheatsASMFollow((uint64_t)BaseB + 0x58) + 0x11;
+        //uint64_t noHUD = *(uint64_t*)(BaseB + 0x58) + 0x11;
+        *((byte*)*(uint64_t*)(BaseB + 0x58) + 0x11) = Cheats::noHUD.enabled;
     }
 }
 int noHUDSet(bool state) {
@@ -717,28 +728,30 @@ bool speedhackOnDeath(void* unused) {
         sp::mem::pointer tmp;
         tmp.set_base((void*)((uint64_t)BaseX + 0x68));
         uint64_t curHP = (uint64_t)tmp.resolve();
+        if (curHP != NULL) {
+            if (*(uint32_t*)curHP == 0x00) {
+                if (speedhackActivated == false) {
 
-        if (*(uint32_t*)curHP == 0x00) {
-            if (speedhackActivated == false) {
+                    ConsoleWriteDebug("-speedhackOnDeath: entered");
+                    ConsoleWriteDebug("--speedHackOnDeath: curHP = %d", *(uint32_t*)curHP);
+                    ConsoleWriteDebug("--speedHackOnDeath: curHP = 0x%X", curHP);
 
-                ConsoleWriteDebug("-speedhackOnDeath: entered");
-                ConsoleWriteDebug("--speedHackOnDeath: curHP = %d", *(uint32_t*)curHP);
-                ConsoleWriteDebug("--speedHackOnDeath: curHP = 0x%X", curHP);
+                    uint64_t ptr = CheatsASMFollow(BaseX + 0x68);
+                    ConsoleWriteDebug("--speedHackOnDeath: ptr0 = 0x%X", ptr);
 
-                uint64_t ptr = CheatsASMFollow(BaseX + 0x68);
-                ConsoleWriteDebug("--speedHackOnDeath: ptr0 = 0x%X", ptr);
+                    ptr = CheatsASMFollow(ptr + 0x68);
+                    ConsoleWriteDebug("--speedHackOnDeath: ptr1 = 0x%X", ptr);
 
-                ptr = CheatsASMFollow(ptr + 0x68);
-                ConsoleWriteDebug("--speedHackOnDeath: ptr1 = 0x%X", ptr);
+                    uint64_t speedModifier = CheatsASMFollow(ptr + 0x18) + 0xA8;
+                    ConsoleWriteDebug("--speedHackOnDeath: speedModifier = 0x%X", speedModifier);
 
-                uint64_t speedModifier = CheatsASMFollow(ptr + 0x18) + 0xA8;
-                ConsoleWriteDebug("--speedHackOnDeath: speedModifier = 0x%X", speedModifier);
-
-                *(float*)speedModifier = 5.0f;
-                speedhackActivated = true;
+                    *(float*)speedModifier = 5.0f;
+                    speedhackActivated = true;
+                }
             }
-        } else {
-            speedhackActivated = false;
+            else {
+                speedhackActivated = false;
+            }
         }
     }
     return true;
@@ -1345,14 +1358,13 @@ bool monitorCharacters(void* unused) {
                     Cheats::applyCheats();
                     ConsoleWriteDebug("--monitorCharacters: returned from Cheats::applyCheats()");
 
-                    P0.update(PlayerBase);
+                    /*P0.update(PlayerBase);
                     P1.update(PlayerBase);
                     P2.update(PlayerBase);
                     P3.update(PlayerBase);
                     P4.update(PlayerBase);
                     P5.update(PlayerBase);
-                    ConsoleWriteDebug("--monitorCharacters: returned from P[012345].update(PlayerBase)");
-
+                    ConsoleWriteDebug("--monitorCharacters: returned from P[012345].update(PlayerBase)");*/
                     //ConsoleWriteDebug("%s --monitorCharacters: Loaded '%ls'", Mod::output_prefix, P0.name());
 
                     prev_playerchar_is_loaded = true;

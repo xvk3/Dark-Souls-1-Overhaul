@@ -293,7 +293,8 @@ void Game::preload_function_caches() {
     Game::get_player_animationMediator();
     host_player_gamedata_cache = NULL;
     Game::get_host_player_gamedata();
-    updateBase();
+    //updateBase();
+    //Cheats::applyCheats();
 
     Sleep(10);
     //this pointer is a bit late to resolve on load
