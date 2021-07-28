@@ -83,6 +83,7 @@ Character P5 = { 0x00 };
 
 bool prev_playerchar_is_loaded = false;
 bool variablesUpdated = false;
+bool warpInProgress = false;
 bool speedhackActivated = false;
 
 Cheats::Cheats()
@@ -127,7 +128,7 @@ void Cheats::start() {
 
     // Moved to GameData.cpp:preload_function_caches()
     // Runs continiously and calls other functions when a character is loaded
-    MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
+    //MainLoop::setup_mainloop_callback(monitorCharacters, NULL, "monitorCharacters");
 
     // Runs continiously monitoring curHP and activating speedhack when player is dead
     // TODO: fix crashing
@@ -1114,21 +1115,27 @@ void hollowChar() {
 }
 
 void warp() {
+  
+    if (Game::playerchar_is_loaded() && variablesUpdated && warpInProgress == false) {
 
-    // TODO Check character is loaded here?
+        warpInProgress = true;
 
-    ConsoleWriteDebug("-warp: entered\n");
+        ConsoleWriteDebug("-warp: entered\n");
 
-    struct SimpleClassHomewardWrapperArguments {
-        uint64_t _BaseB;
-        uint64_t _Homeward;
-    };
+        struct SimpleClassHomewardWrapperArguments {
+            uint64_t _BaseB;
+            uint64_t _Homeward;
+        };
 
-    SimpleClassHomewardWrapperArguments* args = (SimpleClassHomewardWrapperArguments*)malloc(sizeof(SimpleClassHomewardWrapperArguments));
-    args->_BaseB = BaseB;
-    args->_Homeward = Homeward;
+        SimpleClassHomewardWrapperArguments* args = (SimpleClassHomewardWrapperArguments*)malloc(sizeof(SimpleClassHomewardWrapperArguments));
+        args->_BaseB = BaseB;
+        args->_Homeward = Homeward;
 
-    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMHomewardWrapper, args, 0, 0);
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheatsASMHomewardWrapper, args, 0, 0);
+
+    } else {
+        ConsoleWriteDebug("-warp: not ready to warp\n");
+    }
 }
 
 void kick(short player) {
@@ -1243,13 +1250,13 @@ void delayedVariableUpdate() {
     ConsoleWriteDebug("--delayedVariableUpdate: debug_flags = 0x%X", debug_flags);
 
     // One-time initialisation
-    P0 = Character::initialise(P0, PlayerBase, 0);
+    /*P0 = Character::initialise(P0, PlayerBase, 0);
     P1 = Character::initialise(P0, PlayerBase, 1);
     P2 = Character::initialise(P0, PlayerBase, 2);
     P3 = Character::initialise(P0, PlayerBase, 3);
     P4 = Character::initialise(P0, PlayerBase, 4);
-    P5 = Character::initialise(P0, PlayerBase, 5);
-    ConsoleWriteDebug("--delayedVariableUpdate: one-time Character initialisation completed", debug_flags);
+    P5 = Character::initialise(P0, PlayerBase, 5);*/
+    //ConsoleWriteDebug("--delayedVariableUpdate: one-time Character initialisation completed", debug_flags);
 
     if (Mod::enable_qol_cheats) {
 
@@ -1339,8 +1346,12 @@ void updateBase() {
     // PlayerBase
     PlayerBase = *(uint64_t*)(*(uint64_t*)(BaseX + 0x68) + 0x18);
     ConsoleWriteDebug("--updateBase: PlayerBase = 0x%X", PlayerBase);
-    
+
+    // Relinquishing warpInProgress lock
+    warpInProgress = false;
+
     ConsoleWriteDebug("-updateBase: completed\n");
+
 }
 
 bool monitorCharacters(void* unused) {
