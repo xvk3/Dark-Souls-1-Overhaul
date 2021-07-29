@@ -75,6 +75,7 @@ void EstusFlask();
 void EggVermifuge();
 void GoldCoin();
 void PerculiarDoll();
+void Rubbish();
 void RingOfFavorAndProtection();
 void LoadingScreenItems();
 

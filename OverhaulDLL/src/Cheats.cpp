@@ -515,6 +515,39 @@ void PerculiarDoll() {
     // Could try throwing it like a Lloyd's Talisman
 }
 
+void Rubbish() {
+
+    //It's usable if I do (starting at FFFF or vow type) FF FF 97 31 20
+
+    // ID = 380; Offset = 28F8
+    byte modify_refId[4] = { 0xDC, 0x00, 0x00, 0x00 };
+    byte modify_sfx_variation[4] = { 0x01, 0x00, 0x00, 0x00 };
+    byte modify_ref_category[1] = { 0x01 };
+    byte unrestrict_patch[5] = { 0xff, 0xff, 0xbf, 0x31, 0x20 };
+    //byte unrestrict_patch_2[1] = { 0x11 };
+
+    uint64_t Rubbish = CheatsASMFollow(BaseP + 0xF0);
+    Rubbish = CheatsASMFollow(Rubbish + 0x38);
+    Rubbish = Rubbish + 0x28F8;
+
+    ConsoleWriteDebug("-Rubbish = 0x%X", Rubbish);
+
+    ConsoleWriteDebug("--Rubbish: modify_refId         = 0x%X", Rubbish + 0x00);
+    ConsoleWriteDebug("--Rubbish: modify_sfx_variation = 0x%X", Rubbish + 0x04);
+    ConsoleWriteDebug("--Rubbish: modify_ref_catagory  = 0x%X", Rubbish + 0x3B);
+    ConsoleWriteDebug("--Rubbish: unrestrict_patch     = 0x%X", Rubbish + 0x42);
+    //ConsoleWriteDebug("--Rubbish: unrestrict_patch_2   = 0x%X", Rubbish + 0x45);
+
+    memcpy((void*)(Rubbish + 0x00), modify_refId, 4);
+    memcpy((void*)(Rubbish + 0x04), modify_sfx_variation, 1);
+    memcpy((void*)(Rubbish + 0x3B), modify_ref_category, 1);
+    memcpy((void*)(Rubbish + 0x42), unrestrict_patch, 5);
+    //memcpy((void*)(Rubbish + 0x42), unrestrict_patch_2, 1);
+
+    ConsoleWriteDebug("--Rubbish: modify effect (divine blessing), sfx, unrestricted", Mod::output_prefix);
+    ConsoleWriteDebug("-Rubbish: completed\n", Mod::output_prefix);
+}
+
 void RingOfFavorAndProtection() {
 
     return; // Still doesn't work
@@ -1275,6 +1308,7 @@ void delayedVariableUpdate() {
         EggVermifuge();
         GoldCoin();
         PerculiarDoll();
+        Rubbish();
         RingOfFavorAndProtection();
         stopDurabilityDamage();
         ConsoleWriteDebug("--delayedVariableUpdate: QoL cheats enabled");
