@@ -1,6 +1,6 @@
 #include "GameData.h"
 #include "Cheats.h"
-#include "Character.h"
+//#include "Character.h"
 #include "DarkSoulsOverhaulMod.h"
 #include "MainLoop.h"
 #include "SP/io/keybinds.h"
@@ -73,13 +73,6 @@ CHEAT Cheats::eventSuperArmor = { false };
 CHEAT Cheats::noUpdateAI      = { false };
 CHEAT Cheats::noGravity       = { false };
 CHEAT Cheats::noHUD           = { true };
-
-Character P0 = { 0x00 };
-Character P1 = { 0x00 };
-Character P2 = { 0x00 };
-Character P3 = { 0x00 };
-Character P4 = { 0x00 };
-Character P5 = { 0x00 };
 
 bool prev_playerchar_is_loaded = false;
 bool variablesUpdated = false;
@@ -191,7 +184,7 @@ void RedEyeOrb() {
 void EyeOfDeath() {
 
     // ID = 109; Offset = F18
-    byte unrestrict_patch[3] = { 0xff, 0xff, 0xF3 };// Allow use while hollow
+    byte unrestrict_patch[3] = { 0xff, 0xff, 0xF3 };// Allow use while hollow and with phantoms present
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
 
@@ -214,7 +207,7 @@ void EyeOfDeath() {
 
 void GreenBlossom() {
 
-    return;
+    return; // Already perfect
 
     // ID = 260; Offset = 1EE8
     byte unrestrict_use_limit[1] = { 0x00 };
@@ -524,14 +517,12 @@ void PerculiarDoll() {
 
 void RingOfFavorAndProtection() {
 
-    return;
+    return; // Still doesn't work
 
-    // Problem with this function, can't seem to get it working
-
-    uint64_t RingOfFavorAndProtection = CheatsASMFollow(BaseP + 0xF0);
-    RingOfFavorAndProtection = RingOfFavorAndProtection - 0x300a3d4;
+    uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
 
     ConsoleWriteDebug("-RingOfFavorAndProtection0 = 0x%X", RingOfFavorAndProtection);
+    // 0x8BFB7B7C
 
     bitset(RingOfFavorAndProtection + 0x3C, 1);
     ConsoleWrite("--RingOfFavorAndProtection: doesn't break on unequip");
@@ -1516,7 +1507,7 @@ void Cheats::printPlayers() {
 
         ConsoleWrite("No. | SL  | Name             | VIT | ATN | END | STR | DEX | RES | FTH | INT | Phantom Type | Time in World");
         for (int p = 0; p < 6; p++) {
-            uint64_t Player = CheatsASMFollow(PlayerBase + (p * 0x38));
+            uint64_t Player = *(uint64_t*)(PlayerBase + (p * 0x38));
             if (Player) {
 
                 // Desired Format
@@ -1535,6 +1526,7 @@ void Cheats::printPlayers() {
                 */
                 
                 float *Time_in_World = (float*)(CheatsASMFollow(Player + 0x30) + 0x20);
+                //float *Time_in_World = *(float*)(*(uint64_t*)(Player + 0x30) TODO improve this
 
                 ConsoleWriteNLF(" %d  |", p);
                 ConsoleWriteNLF(" %3u |", (unsigned)*(unsigned char*)(CheatsASMFollow(Player + 0x578) + 0x90));   // SL
