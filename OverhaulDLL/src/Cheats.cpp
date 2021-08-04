@@ -539,7 +539,7 @@ void Rubbish() {
     //ConsoleWriteDebug("--Rubbish: unrestrict_patch_2   = 0x%X", Rubbish + 0x45);
 
     memcpy((void*)(Rubbish + 0x00), modify_refId, 4);
-    memcpy((void*)(Rubbish + 0x04), modify_sfx_variation, 1);
+    memcpy((void*)(Rubbish + 0x04), modify_sfx_variation, 4);
     memcpy((void*)(Rubbish + 0x3B), modify_ref_category, 1);
     memcpy((void*)(Rubbish + 0x42), unrestrict_patch, 5);
     //memcpy((void*)(Rubbish + 0x42), unrestrict_patch_2, 1);
