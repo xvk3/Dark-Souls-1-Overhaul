@@ -160,9 +160,11 @@ bool Cheats::applyCheats() {
 void RedEyeOrb() {
 
     // ID = 102; Offset = 0xDA8;
+    byte modify_sfx_variation[1] = { 0x51 };        // Red Sign Soapstone SFX
     byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
     byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
+
 
     uint64_t RedEyeOrb = CheatsASMFollow(BaseP + 0xF0);
     RedEyeOrb = CheatsASMFollow(RedEyeOrb + 0x38);
@@ -170,10 +172,12 @@ void RedEyeOrb() {
 
     ConsoleWriteDebug("-RedEyeOrb = 0x%X", RedEyeOrb);
 
+    ConsoleWriteDebug("--RedEyeOrb: modify_sfx_animation = 0x%X", RedEyeOrb + 0x04);
     ConsoleWriteDebug("--RedEyeOrb: unrestrict_patch     = 0x%X", RedEyeOrb + 0x42);
     ConsoleWriteDebug("--RedEyeOrb: modify_use_animation = 0x%X", RedEyeOrb + 0x3E);
     ConsoleWriteDebug("--RedEyeOrb: opmeMenuType_patch   = 0x%X", RedEyeOrb + 0x3F);
 
+    memcpy((void*)(RedEyeOrb + 0x04), modify_sfx_variation, 1);
     memcpy((void*)(RedEyeOrb + 0x42), unrestrict_patch, 3);
     memcpy((void*)(RedEyeOrb + 0x3E), modify_use_animation, 1);
     memcpy((void*)(RedEyeOrb + 0x3F), opmeMenuType_patch, 1);   // Could be combined with the "modify_use_animation" patch
@@ -207,7 +211,7 @@ void EyeOfDeath() {
 
 void GreenBlossom() {
 
-    return; // Already perfect
+    return; // Already perfect =D
 
     // ID = 260; Offset = 1EE8
     byte unrestrict_use_limit[1] = { 0x00 };
@@ -245,7 +249,9 @@ void RedSignSoapstone() {
 void CrackedRedEyeOrb() {
 
     // ID = 111; Offset = F74
+    byte modify_sfx_variation[1] = { 0x51 };        // Red Sign Soapstone SFX
     byte unrestrict_patch[3] = { 0xff, 0xff, 0x63 };// Allow use while hollow
+    byte modify_use_animation[1] = { 0x0E };        // Silver Pendant animation
     byte opmeMenuType_patch[1] = { 0x00 };          // Disable dialog on use
     /* first two bytes are "vowType"s
     bit                  0x63   0xC3    0xBF    0xC4    0xC1    0xF1    0xF3
@@ -265,10 +271,14 @@ void CrackedRedEyeOrb() {
 
     ConsoleWriteDebug("-CrackedRedEyeOrb = 0x%X", CrackedRedEyeOrb);
 
+    ConsoleWriteDebug("--CrackedRedEyeOrb: modify_sfx_animation = 0x%X", CrackedRedEyeOrb + 0x04);
     ConsoleWriteDebug("--CrackedRedEyeOrb: unrestrict_patch     = 0x%X", CrackedRedEyeOrb + 0x42);
+    ConsoleWriteDebug("--CrackedRedEyeOrb: modify_use_animation = 0x%X", CrackedRedEyeOrb + 0x3E);
     ConsoleWriteDebug("--CrackedRedEyeOrb: opmeMenuType_patch   = 0x%X", CrackedRedEyeOrb + 0x3F);
 
+    memcpy((void*)(CrackedRedEyeOrb + 0x04), modify_sfx_variation, 1);
     memcpy((void*)(CrackedRedEyeOrb + 0x42), unrestrict_patch, 3);
+    memcpy((void*)(CrackedRedEyeOrb + 0x3E), modify_use_animation, 1);
     memcpy((void*)(CrackedRedEyeOrb + 0x3F), opmeMenuType_patch, 1);
     ConsoleWriteDebug("--CrackedRedEyeOrb: no menu, no restrictions", Mod::output_prefix);
     ConsoleWriteDebug("-CrackedRedEyeOrb: completed\n", Mod::output_prefix);
@@ -521,10 +531,9 @@ void Rubbish() {
 
     // ID = 380; Offset = 28F8
     byte modify_refId[4] = { 0xDC, 0x00, 0x00, 0x00 };
-    byte modify_sfx_variation[4] = { 0x01, 0x00, 0x00, 0x00 };
+    byte modify_sfx_variation[4] = { 0x43, 0x00, 0x00, 0x00 };
     byte modify_ref_category[1] = { 0x01 };
     byte unrestrict_patch[5] = { 0xff, 0xff, 0xbf, 0x31, 0x20 };
-    //byte unrestrict_patch_2[1] = { 0x11 };
 
     uint64_t Rubbish = CheatsASMFollow(BaseP + 0xF0);
     Rubbish = CheatsASMFollow(Rubbish + 0x38);
@@ -542,7 +551,6 @@ void Rubbish() {
     memcpy((void*)(Rubbish + 0x04), modify_sfx_variation, 4);
     memcpy((void*)(Rubbish + 0x3B), modify_ref_category, 1);
     memcpy((void*)(Rubbish + 0x42), unrestrict_patch, 5);
-    //memcpy((void*)(Rubbish + 0x42), unrestrict_patch_2, 1);
 
     ConsoleWriteDebug("--Rubbish: modify effect (divine blessing), sfx, unrestricted", Mod::output_prefix);
     ConsoleWriteDebug("-Rubbish: completed\n", Mod::output_prefix);
@@ -550,7 +558,7 @@ void Rubbish() {
 
 void RingOfFavorAndProtection() {
 
-    return; // Still doesn't work
+    //return; // Still doesn't work
 
     uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
 

@@ -11,6 +11,9 @@ extern "C" {
 }
 
 void DeadAngles::start() {
+
+    if (!Mod::legacy_mode) return;
+
     ConsoleWrite("Enabling Dead Angles...");
 
     uint8_t *write_address = (uint8_t*)(DeadAngles::main_dead_angle_injection_offset + Game::ds1_base);
