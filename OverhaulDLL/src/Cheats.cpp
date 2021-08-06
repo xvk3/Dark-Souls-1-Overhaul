@@ -43,6 +43,7 @@ inline void bittog(uint64_t ptr, short bit);
 bool monitorCharacters(void* unused);
 bool delayedVariableUpdateWrapper(void* unused);
 bool speedhackOnDeath(void* unused);
+bool warpOnDeath(void* unused);
 
 void delayedVariableUpdate();
 void printPreferences();
@@ -78,6 +79,10 @@ bool prev_playerchar_is_loaded = false;
 bool variablesUpdated = false;
 bool warpInProgress = false;
 bool speedhackActivated = false;
+
+const uint32_t gesture_anim_ids[15] = { 6800, 6801, 6802, 6803, 6804, 6805, 6806, 6807, 6808, 6809, 6810, 6815, 6820, 6825, 6830 };
+
+Tae Cheats::player_tae = Tae();
 
 Cheats::Cheats()
 {
@@ -128,6 +133,9 @@ void Cheats::start() {
     // I think it's because curHP results in a nullptr during the loading screen after death
     // Need to hold off running code until the character is back loaded.
     //MainLoop::setup_mainloop_callback(speedhackOnDeath, NULL, "speedhackOnDeath");
+
+    // Also crashes the game, same as above ^^
+    //MainLoop::setup_mainloop_callback(warpOnDeath, NULL, "warpOnDeath");
 
     //MainLoop::setup_mainloop_callback((MainLoopCallback)Cheats::applyCheats, NULL, "applyCheats");
 
@@ -561,9 +569,16 @@ void RingOfFavorAndProtection() {
     //return; // Still doesn't work
 
     uint64_t RingOfFavorAndProtection = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00");
+    uint64_t RingOfFavorAndProtection2 = (uint64_t)sp::mem::aob_scan("CA 08 00 00 FF FF FF FF 00 00 00 00 00 00 00 00", (void*)(RingOfFavorAndProtection + 0x10));
 
-    ConsoleWriteDebug("-RingOfFavorAndProtection0 = 0x%X", RingOfFavorAndProtection);
+    ConsoleWriteDebug("-RingOfFavorAndProtection = 0x%X", RingOfFavorAndProtection);
     // 0x8BFB7B7C
+    // 0x8A47705C
+    // 0x8BF38A7C
+    // 0x8BFD35BC
+
+    ConsoleWriteDebug("-RingOfFavorAndProtection2 = 0x%X", RingOfFavorAndProtection2);
+    // Identical to the above, shouldn't happen since I set the startAddress for the aob_scan
 
     bitset(RingOfFavorAndProtection + 0x3C, 1);
     ConsoleWrite("--RingOfFavorAndProtection: doesn't break on unequip");
@@ -753,20 +768,34 @@ int noHUDSet(bool state) {
 // No Collision
 // Fly mode
 
-bool speedhackOnDeath(void* unused) {
+bool warpOnDeath(void* unused) {
+    if (BaseX && Game::playerchar_is_loaded()) {
+        uint64_t curHP = *(uint64_t*)(BaseX + 0x68);
+        if (curHP != NULL) {
+            ConsoleWriteDebug("curHP = %d", curHP);
+            if (*(uint32_t*)curHP == 0x00) {
+                warp();
+            }
+        }
+    }
+    return true;
+}
 
+bool speedhackOnDeath(void* unused) {
 
     if (BaseX && Game::playerchar_is_loaded()) {
 
-        sp::mem::pointer tmp;
-        tmp.set_base((void*)((uint64_t)BaseX + 0x68));
-        uint64_t curHP = (uint64_t)tmp.resolve();
+        uint64_t curHP = *(uint64_t*)(BaseX + 0x68);
+
         if (curHP != NULL) {
+
+            ConsoleWriteDebug("curHP = %d", curHP);
+
             if (*(uint32_t*)curHP == 0x00) {
                 if (speedhackActivated == false) {
 
                     ConsoleWriteDebug("-speedhackOnDeath: entered");
-                    ConsoleWriteDebug("--speedHackOnDeath: curHP = %d", *(uint32_t*)curHP);
+                    ConsoleWriteDebug("--speedHackOnDeath: *curHP = %d", *(uint32_t*)curHP);
                     ConsoleWriteDebug("--speedHackOnDeath: curHP = 0x%X", curHP);
 
                     uint64_t ptr = CheatsASMFollow(BaseX + 0x68);
@@ -1275,11 +1304,13 @@ void delayedVariableUpdate() {
     // Initialise debug_flagsOffset
     debug_flagsOffset = (uint64_t)sp::mem::aob_scan("4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 41 B1 01 4C 8D 05 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B 8F 10 01 00 00 E8");
     //debug_flagsOffset = Game::ds1_base + 0x374F7E;
+    //debug_flagsOffset = Game::ds1_base + 0x374F7E;
+    // Can I hard code this now? Two seperate executions of the game resulted in the same offset?
     ConsoleWriteDebug("--delayedVariableUpdate: debug_flagsOffset = 0x%X", debug_flagsOffset);
 
     // debug_flags
     debug_flags = (uint64_t)debug_flagsOffset + *(uint32_t*)((uint64_t)debug_flagsOffset + 3) + 7;
-    ConsoleWriteDebug("--delayedVariableUpdate: debug_flags = 0x%X", debug_flags);
+    ConsoleWriteDebug("--delayedVariableUpdate: debug_flags = 0x%X\n", debug_flags);
 
     // One-time initialisation
     /*P0 = Character::initialise(P0, PlayerBase, 0);
@@ -1328,6 +1359,18 @@ void delayedVariableUpdate() {
         ConsoleWriteDebug("--delayedVariableUpdate: bIgnoreLeaveMessages = %s", GameMan_Set_bIgnoreLeaveMessages(0xFF) ? "true" : "false");
         printBytes((uint64_t)GameMan_Ptr_bIgnoreLeaveMessages(), 1);
     }
+
+    // Work on this
+    /*if (true) {
+
+        // Perform TAE edits to player animations to enable gesture cancelling
+        char s[] = "54 41 45 20 00 00 00 00 0B 00 01 00 B4 AE 09 00";
+        void *ret_val = (void*)Cheats::player_tae.init_from_aob_scan(s);
+        ConsoleWriteDebug("Cheats::player_tae = 0x%X", Cheats::player_tae);
+
+
+
+    }*/
 
     variablesUpdated = true;
     ConsoleWriteDebug("-delayedVariableUpdate: completed\n");
@@ -1421,6 +1464,39 @@ bool monitorCharacters(void* unused) {
         }
     }
     return true;
+}
+
+bool Cheats::enable_gesture_cancelling()
+{
+    int gestures_changed = 0;
+    if (Game::characters_loaded && Cheats::player_tae.is_initialized())
+    {
+        for (uint32_t id : gesture_anim_ids) {
+            int n_events = Cheats::player_tae.get_event_count_by_id(id);
+            for (int i = 0; i < n_events; i++) {
+                bool anim_updated = false;
+                if (Cheats::player_tae.get_event_type_by_id(id, i) == 0 &&
+                    (
+                        Cheats::player_tae.get_event_param_by_id(id, i, 0) == TAE_type0_param_values::allow_animation_cancel_events ||
+                        Cheats::player_tae.get_event_param_by_id(id, i, 0) == TAE_type0_param_values::cancel_by_rolling_or_backstepping
+                        )
+                    )
+                {
+                    Cheats::player_tae.set_event_start_by_id(id, i, 0.0f);
+                    ConsoleWriteDebug("Updated gesture %d, event %d to allow cancelling", id, i);
+                    //    Mod::startup_messages.push_back("Updated gesture " + std::to_string(id) + ", event " + std::to_string(i) + " to allow cancelling");
+                    if (!anim_updated) {
+                        anim_updated = true;
+                        gestures_changed++;
+                    }
+                }
+            }
+        }
+        return (gestures_changed >= 15);
+    }
+    else {
+        return false;
+    }
 }
 
 void printBytes(uint64_t pointer, short rows_of_eight) {

@@ -29,6 +29,7 @@ public:
     // Cheats
     static void start();
     static void teleport(COORDINATES);
+    static bool enable_gesture_cancelling();
 
     // Variables
     COORDINATES Burg            = { 0.0, 0.0, 0.0 };
@@ -53,6 +54,8 @@ public:
     static CHEAT noUpdateAI;        // ToggleUpdateAI
     static CHEAT noGravity;         // ToggleGravity
     static CHEAT noHUD;             // ToggleHUD
+
+    static Tae player_tae;
 
 };
 
