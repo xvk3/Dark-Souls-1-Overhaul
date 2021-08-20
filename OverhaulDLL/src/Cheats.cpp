@@ -1361,6 +1361,7 @@ void delayedVariableUpdate() {
     }
 
     // Work on this
+    // Nah, using crow's method of changing the TAE - modify the game files directly
     /*if (true) {
 
         // Perform TAE edits to player animations to enable gesture cancelling

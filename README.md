@@ -22,7 +22,7 @@
  - [x] - Implement "No Gravity"
  - [ ] - PvP Area Coordinates + Photos
  - [x] - Tidy up CheatsASM.asm
- - [ ] - Find and enable gesture roll cancelling in Legacy mode
+ - [x] - Find and enable gesture roll cancelling in Legacy mode
  - [ ] - Improve the hotkeys
  - [ ] - Replace references to CheatsASMFollow with multi-level pointer dereferences (sp::mem::pointer?)
  - [x] - Confirm all cheats write the correct number of bytes to the address (noHUD was overwriting other data)

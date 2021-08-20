@@ -21,7 +21,6 @@
 #include "ModNetworking.h"
 #include "Cheats.h"
 
-
 /*
     Initialize static variables:
 */
@@ -50,6 +49,10 @@ uint64_t Game::file_man = NULL;
 uint64_t Game::session_man_imp = NULL;
 
 uint64_t Game::menu_man = NULL;
+
+uint64_t Game::bullet_man = NULL;
+
+uint64_t Game::unknown_global_struct_141d283a8 = NULL;
 
 // Player character status (loading, human, co-op, invader, hollow)
 sp::mem::pointer<int32_t> Game::player_char_status;
@@ -136,6 +139,10 @@ void Game::init()
 
     Game::menu_man = Game::ds1_base + 0x1d26168;
 
+    Game::bullet_man = Game::ds1_base + 0x1d177e8;
+
+    Game::unknown_global_struct_141d283a8 = 0x141d283a8;
+
     //hook the code that calculates attack damage and save off the weapon id used for the attack
     last_attack_weaponid = -1;
     write_address = (uint8_t*)(Game::calculate_attack_damage_offset + Game::ds1_base);
@@ -193,6 +200,9 @@ bool Game::on_character_load(void* unused)
                 print_console("Error getting Animation Table Entry address");
             }
         }*/
+
+        //need to force refresh the character in case this character was in a different mode then the current when it was previous loaded
+        FileReloading::RefreshPlayerStats();
 
         character_reload_run = true;
 
@@ -1241,4 +1251,39 @@ void Game::show_popup_message(const wchar_t* msg)
         }
         i = i + 1;
     } while (i < 5);
+}
+
+std::optional<void*> Game::find_bullet(uint32_t owner_handle, uint32_t bullet_num)
+{
+    //this points to a linked list of the bullets in use. Follow backwards till there isn't another node in the list
+    uint64_t current_bullet_in_use = *(uint64_t*)((*(uint64_t*)Game::bullet_man) + 8);
+    while (current_bullet_in_use != NULL)
+    {
+        uint8_t cur_bullet_num = *(uint8_t*)(current_bullet_in_use + 8);
+        uint32_t cur_bullet_owner = *(uint32_t*)(current_bullet_in_use + 156);
+        if (cur_bullet_num == bullet_num && cur_bullet_owner == cur_bullet_owner)
+        {
+            return (void*)(current_bullet_in_use);
+        }
+        else
+        {
+            current_bullet_in_use = *(uint64_t*)(current_bullet_in_use + 0x348);
+        }
+    }
+
+    return std::nullopt;
+}
+
+bool Game::set_invasion_refresh_timer(float newtime)
+{
+    sp::mem::pointer refresh_timer = sp::mem::pointer<float>((void*)(Game::unknown_global_struct_141d283a8), { 0x8, 0x8, 0x1e4 });
+    if (refresh_timer.resolve() == NULL)
+    {
+        return false;
+    }
+    else
+    {
+        *(refresh_timer.resolve()) = newtime;
+        return true;
+    }
 }
