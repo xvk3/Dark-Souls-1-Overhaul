@@ -12,7 +12,7 @@ extern "C" {
 
 void DeadAngles::start() {
 
-    if (!Mod::legacy_mode) return;
+    if (Mod::legacy_mode) return;
 
     ConsoleWrite("Enabling Dead Angles...");
 

@@ -766,6 +766,7 @@ int noHUDSet(bool state) {
 }
 
 // No Collision
+// No fog gates
 // Fly mode
 
 bool warpOnDeath(void* unused) {
@@ -1326,7 +1327,7 @@ void delayedVariableUpdate() {
         Cheats::noGoodsConsume.enabled = true;
         Cheats::noArrowConsume.enabled = true;
         Cheats::noMagicConsume.enabled = true;
-        Cheats::noUpdateAI.enabled = true;
+        Cheats::noUpdateAI.enabled = false;
 
         RedEyeOrb();
         EyeOfDeath();
