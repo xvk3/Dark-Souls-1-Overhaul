@@ -489,12 +489,12 @@ void AntiAntiCheat::start() {
     //patch out the hash comparison checks (compare with input to always be true)
     uint8_t patch[] = { 0x39, 0xC0 };
     for (auto patch_loc : game_hash_compare_checks) {
-        bool res = sp::mem::patch_bytes((void*)(patch_loc+3), patch, sizeof(patch));
-        if (!res) FATALERROR("Unable to disable cmp anti-cheat for addr %x", patch_loc+3);
+        bool res = sp::mem::patch_bytes((void*)(patch_loc + 3), patch, sizeof(patch));
+        if (!res) FATALERROR("Unable to disable cmp anti-cheat for addr %x", patch_loc + 3);
     }
 
     //patch out the conditional jmps to the start of anti-cheat functions to disable them
-    uint8_t patch_nop[6] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
+    uint8_t patch_nop[6] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     for (auto patch_loc : game_runtime_hash_checks) {
         bool res = sp::mem::patch_bytes((void*)std::get<0>(patch_loc), patch_nop, std::get<1>(patch_loc));
         if (!res) FATALERROR("Unable to disable jmp anti-cheat for addr %x", std::get<0>(patch_loc));
@@ -503,13 +503,13 @@ void AntiAntiCheat::start() {
     //Disable what appear to be cheat detection things
     //change the setting of the bool so that it always stays false
     //i don't see any situation where this bool is actually _read_, but better safe
-    uint8_t patch_false = 0 ;
+    uint8_t patch_false = 0;
     for (auto patch_loc : game_invalid_data_checks)
     {
-        bool res = sp::mem::patch_bytes((void*)(Game::ds1_base+patch_loc+6), &patch_false, 1);
+        bool res = sp::mem::patch_bytes((void*)(Game::ds1_base + patch_loc + 6), &patch_false, 1);
         if (!res) FATALERROR("Unable to disable invalid game data check for addr %x", patch_loc);
     }
-    
+
     //Before sending to the server make sure the data is correct
     write_address = (uint8_t*)(AntiAntiCheat::game_write_playerdata_to_flatbuffer_injection_offset + Game::ds1_base);
     sp::mem::code::x64::inject_jmp_14b(write_address, &game_write_playerdata_to_flatbuffer_injection_return, 0, &game_write_playerdata_to_flatbuffer_injection);
@@ -521,44 +521,43 @@ void AntiAntiCheat::start() {
 
     write_address = (uint8_t*)(AntiAntiCheat::finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_offset + Game::ds1_base);
     sp::mem::code::x64::inject_jmp_14b(write_address, &finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_return, 1, &finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection);
-
 }
 
 
 //use to store the original values of the memberflags before we edited them, since touching them directly can break stuff
 //save the game's true value here on function entry, overwrite the game values so the flatbuffer sees our values, then restore to this on function exit
 void* memberflags_ptr = NULL;
-uint8_t memberflags_orig[708];
+uint64_t memberflags_orig[4];
 
 void set_value_in_MemberFlags(uint64_t input_data, MemberFlags_IdentifiersEnum flag, void* value)
 {
     if (flag < MemberFlags_IdentifiersEnum::Stamina)
     {
-        *(uint32_t*)(input_data + 0x20 + 4*flag) = *(uint32_t*)value;
+        *(uint32_t*)(input_data + 0x20 + 4 * flag) = *(uint32_t*)value;
         return;
     }
     uint32_t flag_2 = flag - 0x2E;
     if (flag_2 < 0x23)
     {
-        *(uint32_t*)(input_data + 0xD8 + 4*flag_2) = *(uint32_t*)value;
+        *(uint32_t*)(input_data + 0xD8 + 4 * flag_2) = *(uint32_t*)value;
         return;
     }
     uint32_t flag_4 = flag - 0x53;
     if (flag_4 < 0xA)
     {
-        *(uint8_t*)(input_data + 0x170 + 1*flag_4) = *(uint8_t*)value;
+        *(uint8_t*)(input_data + 0x170 + 1 * flag_4) = *(uint8_t*)value;
         return;
     }
     uint32_t flag_5 = flag - 0x5D;
     if (flag_5 < 0x3)
     {
-        *(float*)(input_data + 0x17C + 4*flag_5) = *(float*)value;
+        *(float*)(input_data + 0x17C + 4 * flag_5) = *(float*)value;
         return;
     }
     if (flag == MemberFlags_IdentifiersEnum::NormalResists)
     {
         *(uint64_t*)(input_data + 0x274) = *(uint64_t*)value;
-        *(uint32_t*)(input_data + 0x27c) = *(uint32_t*)((uint64_t)value+8);
+        *(uint32_t*)(input_data + 0x27c) = *(uint32_t*)((uint64_t)value + 8);
         return;
     }
     if (flag == MemberFlags_IdentifiersEnum::NormalDefenses)
@@ -591,19 +590,19 @@ void set_value_in_MemberFlags(uint64_t input_data, MemberFlags_IdentifiersEnum f
     if (flag == MemberFlags_IdentifiersEnum::New_Name_111)
     {
         *(uint64_t*)(input_data + 0x2a8) = *(uint64_t*)((uint64_t)value + 0);
-        *(uint64_t*)(input_data + 0x2a8+8) = *(uint64_t*)((uint64_t)value + 8);
-        *(uint64_t*)(input_data + 0x2a8+16) = *(uint64_t*)((uint64_t)value + 16);
-        *(uint32_t*)(input_data + 0x2a8+24) = *(uint32_t*)((uint64_t)value + 24);
+        *(uint64_t*)(input_data + 0x2a8 + 8) = *(uint64_t*)((uint64_t)value + 8);
+        *(uint64_t*)(input_data + 0x2a8 + 16) = *(uint64_t*)((uint64_t)value + 16);
+        *(uint32_t*)(input_data + 0x2a8 + 24) = *(uint32_t*)((uint64_t)value + 24);
         return;
     }
 
     FATALERROR("%s Invalid flag=%d", __FUNCTION__, flag);
 }
 
-void set_MemberFlags_bitflag(uint64_t input_data, MemberFlags_IdentifiersEnum flag)
+void compute_MemberFlags_bitflag(uint64_t* bitflags_and, MemberFlags_IdentifiersEnum flag)
 {
-    *(uint64_t*)(input_data + (flag >> 0x6) * 0x8) = (*(uint64_t*)(input_data + (flag >> 0x6) * 0x8)) | 1ULL << (flag & 0x3f);
-    *(uint64_t*)(input_data + 0x10 + (flag >> 0x6) * 0x8) = (*(uint64_t*)(input_data + 0x10 + (flag >> 0x6) * 0x8)) | 1ULL << (flag & 0x3f);
+    bitflags_and[(flag >> 0x6)] |= 1ULL << (flag & 0x3f);
+    bitflags_and[2 + (flag >> 0x6)] |= 1ULL << (flag & 0x3f);
 }
 
 void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_t input_data)
@@ -612,155 +611,42 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
 
     //save the old values
     memberflags_ptr = (void*)input_data;
-    memcpy(memberflags_orig, memberflags_ptr, sizeof(memberflags_orig));
-
-    //unset all the bitflags, so we don't send any info to the server
-    memset((void*)input_data, 0x00, 32);
+    memcpy_s(memberflags_orig, sizeof(memberflags_orig), memberflags_ptr, 32);
 
     //allow only some mandatory data to be sent
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MpRegion);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RankingRegistration);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RegionMatchmaking);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHollow);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CharacterName);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CovenantId);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::inSession);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionNatType);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionRoleID);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_100);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulLevel);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHuman);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ClearCount);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxWeaponLevel);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_7);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_105);
+    uint64_t membitflags_allowed[4];
+    memset(membitflags_allowed, 0, sizeof(membitflags_allowed));
 
-    // Full set of MemberFlags
-    /*
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::AreaId);                   
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ClearCount);               // Number of times player has beaten the game
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::DeathCount);               // Number of deaths
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MultiplayerCount);         // Ought to be safe
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CoopSuccessCount);         // Ought to be safe
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_5);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_6);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_7);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulLevel);                // Ought to be safe (assuming non-cheated build)
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulCount);                // Ought to be safe
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SoulMemory);               // Total souls acquired
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Archetype);                // Starting class?
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::HP);                       // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxHp);                    // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxHp_1);              // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Mp);                       // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxMp);                    // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxHp_2);              // Should be safe in Legacy
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Vitality);                 // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Attunement);               // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Endurance);                // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Strength);                 // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Dexterity);                // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Resistance);               // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Intelligence);             // Just stats
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Force);                    // Probably should be "Faith"
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ItemDiscoveryRate);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackR1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackR2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackL1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::attackL2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxWeaponLevel);           // Probably necessary for online matchmaking
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EstusLevel);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RankingRegistration);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::PlayTime);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::HumanityCount);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Left_Hand_1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Left_Hand_2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Right_Hand_1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Right_Hand_2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorHeadInv);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorBodyInv);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorArmsInv);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorLegsInv);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::LeftHandHeldWeaponSlot);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RightHandHeldWeaponSlot);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Stamina);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxStamina);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::BaseMaxStamina);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::WeaponinSlot3);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::ArmorinSlot3);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RinginSlot0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RinginSlot1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar3);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminQuickbar4);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::IteminArrowBoltSlot3);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell1);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell2);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell3);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell4);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell5);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell6);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell7);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell8);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell9);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell10);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell11);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::EquippedSpell12);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionRoleID);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_81);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_82);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::RegionMatchmaking);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHollow);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::PlayerSex);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::isPlayerHuman);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_87);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_88);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_89);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_91);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::Const0);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_93);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::defSAToughnessTotal);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MaxEquipLoad);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CharacterName);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_97);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_98);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_100);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::MpRegion);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::SessionNatType);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CovenantId);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::inSession);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_105);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::NormalDefenses);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::NormalResists);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::CovenantLevel);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_109);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_110);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_111);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_112);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_113);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_114);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_115);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_116);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_117);
-    set_MemberFlags_bitflag(input_data, MemberFlags_IdentifiersEnum::New_Name_118);
-    */
+    //needed to invade
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::AreaId);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::MpRegion);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::RankingRegistration);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::RegionMatchmaking);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::isPlayerHollow);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::CharacterName);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::CovenantId);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::inSession);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::SessionNatType);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::SessionRoleID);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::hasInvasionTimeLimit);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::recentMPAreasVisited);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::New_Name_100);
+    //needed to be invaded
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::SoulLevel);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::ClearCount);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::MaxWeaponLevel);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::isPlayerHuman);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::New_Name_7);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::New_Name_105);
 
+    //unset all the bitflags we don't whitelist
+    //this ensures we only remove data, instead of adding data
+    uint64_t membitflags_resultant[4];
+    membitflags_resultant[0] = memberflags_orig[0] & membitflags_allowed[0];
+    membitflags_resultant[1] = memberflags_orig[1] & membitflags_allowed[1];
+    membitflags_resultant[2] = memberflags_orig[2] & membitflags_allowed[2];
+    membitflags_resultant[3] = memberflags_orig[3] & membitflags_allowed[3];
+    memcpy_s((void*)input_data, 32, membitflags_resultant, sizeof(membitflags_resultant));
 }
 
 void finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper()
@@ -771,7 +657,7 @@ void finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(
         return;
     }
     //restore the old values and be safe to ensure we don't use a stale pointer
-    memcpy(memberflags_ptr, memberflags_orig, sizeof(memberflags_orig));
+    memcpy_s(memberflags_ptr, 32, memberflags_orig, sizeof(memberflags_orig));
     memberflags_ptr = NULL;
 }
 
