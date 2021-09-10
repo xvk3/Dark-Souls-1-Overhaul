@@ -44,10 +44,12 @@ bool equipment_change_unlock_injection_helper(InventorySlots menu_slot)
 
     //if we're currently backstabbing, don't allow any swaps
     //(anim ids ending in 400 are backstab, 401 is hornet bs)
-    if ((state_anim % 1000) == 400 || (state_anim % 1000) == 401)
+    /*if ((state_anim % 1000) == 400 || (state_anim % 1000) == 401)
     {
         return false;
-    }
+    }*/
+    // this is bugged, stagger priority backstabs that normally allow swaps no longer work
+    // 
 
     //if we're riposting, prevent ALL swaps
     if ((state_anim % 1000) == 201 || (state_anim % 1000) == 202 || (state_anim % 1000) == 203) {
