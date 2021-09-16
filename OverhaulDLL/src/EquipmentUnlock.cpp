@@ -42,18 +42,24 @@ bool equipment_change_unlock_injection_helper(InventorySlots menu_slot)
 
     auto state_anim = Game::get_animation_mediator_state_animation(animation_mediator, Upper_ThrowAnim);
 
+    auto playerIns_o = Game::get_PlayerIns();
+    if (!playerIns_o.has_value())
+    {
+        ConsoleWrite("Warning: unable to get_PlayerIns in %s\n", __FUNCTION__);
+        return true;
+    }
+    auto playerIns = playerIns_o.value();
+
     //if we're currently backstabbing, don't allow any swaps
     //(anim ids ending in 400 are backstab, 401 is hornet bs)
-    /*if ((state_anim % 1000) == 400 || (state_anim % 1000) == 401)
+    if ((state_anim % 1000) == 400 || (state_anim % 1000) == 401)
     {
-        return false;
-    }*/
-    // this is bugged, stagger priority backstabs that normally allow swaps no longer work
-    // 
-
+        return ok_to_enter_equipment_menu(playerIns);
+    }
+    
     //if we're riposting, prevent ALL swaps
     if ((state_anim % 1000) == 201 || (state_anim % 1000) == 202 || (state_anim % 1000) == 203) {
-        return false;
+        return ok_to_enter_equipment_menu(playerIns);
     }
 
     //if we're being backstabbed, allow ALL swaps (so weapon blocking can be done on getup)
@@ -62,13 +68,6 @@ bool equipment_change_unlock_injection_helper(InventorySlots menu_slot)
         return true;
     }
 
-    auto playerIns_o = Game::get_PlayerIns();
-    if (!playerIns_o.has_value())
-    {
-        ConsoleWrite("Warning: unable to get_PlayerIns in %s\n", __FUNCTION__);
-        return true;
-    }
-    auto playerIns = playerIns_o.value();
 
     //normally, allow all swaps (except weapons if the game would normally restrict all inventory edits)
     return (menu_slot > RightHand2 || ok_to_enter_equipment_menu(playerIns));
