@@ -368,7 +368,7 @@ enum MemberFlags_IdentifiersEnum
     CoopSuccessCount = 0x4,
     New_Name_5 = 0x5,
     New_Name_6 = 0x6,
-    New_Name_7 = 0x7,
+    RegulationVersion = 0x7,
     SoulLevel = 0x8,
     SoulCount = 0x9,
     SoulMemory = 0xa,
@@ -466,7 +466,7 @@ enum MemberFlags_IdentifiersEnum
     SessionNatType = 0x66,
     CovenantId = 0x67,
     inSession = 0x68,
-    New_Name_105 = 0x69,
+    SessionState = 0x69,
     NormalDefenses = 0x6a,
     NormalResists = 0x6b,
     CovenantLevel = 0x6c,
@@ -609,7 +609,7 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
 {
     input_data = input_data + 0x78; //&input_data->memberflags
 
-    //save the old values
+      //save the old values
     memberflags_ptr = (void*)input_data;
     memcpy_s(memberflags_orig, sizeof(memberflags_orig), memberflags_ptr, 32);
 
@@ -617,7 +617,7 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     uint64_t membitflags_allowed[4];
     memset(membitflags_allowed, 0, sizeof(membitflags_allowed));
 
-    //needed to invade
+    //needed in invade
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::AreaId);
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::MpRegion);
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::RankingRegistration);
@@ -636,8 +636,35 @@ void construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(uint64_
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::ClearCount);
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::MaxWeaponLevel);
     compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::isPlayerHuman);
-    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::New_Name_7);
-    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::New_Name_105);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::RegulationVersion);
+    compute_MemberFlags_bitflag(membitflags_allowed, MemberFlags_IdentifiersEnum::SessionState);
+
+    //TMP
+    uint32_t* arraystart = *(uint32_t**)(input_data + 0x228);
+    uint32_t* arrayend = *(uint32_t**)(input_data + 0x230);
+    ConsoleWrite("SessionState=[");
+    while (arraystart != arrayend)
+    {
+        ConsoleWrite("\t%d", *arraystart);
+        if (*arraystart != 0 && *arraystart != 1 && *arraystart != 2 && *arraystart != 3)
+        {
+            FATALERROR("UNKNOWN SessionState VALUE");
+        }
+        arraystart += 1;
+    }
+    ConsoleWrite("]");
+    uint32_t RegulationVersion = *(uint32_t*)(input_data + 0x20 + (MemberFlags_IdentifiersEnum::RegulationVersion * 4));
+    ConsoleWrite("RegulationVersion=%d", RegulationVersion);
+    if (RegulationVersion != 0 && RegulationVersion != 1040000)
+    {
+        FATALERROR("UNKNOWN RegulationVersion VALUE");
+    }
+    uint8_t isPlayerHuman = *(uint8_t*)(input_data + 0x170 + ((MemberFlags_IdentifiersEnum::isPlayerHuman - 0x53) * 1));
+    ConsoleWrite("isPlayerHuman=%d", isPlayerHuman);
+    if (isPlayerHuman != 0 && isPlayerHuman != 1)
+    {
+        FATALERROR("UNKNOWN isPlayerHuman VALUE");
+    }
 
     //unset all the bitflags we don't whitelist
     //this ensures we only remove data, instead of adding data
@@ -660,7 +687,6 @@ void finish_construct_flatbuffer_from_PlayerStatus_MemberFlags_injection_helper(
     memcpy_s(memberflags_ptr, 32, memberflags_orig, sizeof(memberflags_orig));
     memberflags_ptr = NULL;
 }
-
 
 const uint32_t hackerFlag = 0x1770;
 const std::unordered_set<uint32_t> known_good_hash_vals_array_x64 = { 0x0, 0x37A, 0x3DE, 0x0AF0, 0x0E74, 0x29D6, 0x13C5E, 0x1895C, 0x4C4EBA, 0x0F1EB4, 1, 0x317, 0xa8f, 0x3e7 };
